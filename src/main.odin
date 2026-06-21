@@ -4,7 +4,7 @@ import "core:fmt"
 import "core:log"
 import "core:mem"
 import wm "window_manager"
-import cb "color_buffer"
+import "color_buffer"
 import sdl "vendor:sdl2"
 
 is_running: bool = false
@@ -13,15 +13,15 @@ setup :: proc() -> (success: bool) {
 	success = wm.init_window()
 
 	if success {
-		buffer_size :: u32(wm.WINDOW_WIDTH * wm.WINDOW_HEIGHT)
-		cb.init_color_buffer(buffer_size)
+		color_buffer.init()
+		color_buffer.init_texture()
 	}
 
 	return success
 }
 
 cleanup :: proc() {
-	cb.delete_color_buffer()
+	color_buffer.destroy()
 	wm.destroy_window()
 }
 
@@ -51,8 +51,11 @@ update :: proc() {
 }
 
 render :: proc() {
-	sdl.SetRenderDrawColor(wm.renderer, 255, 0, 0, 255)
+	sdl.SetRenderDrawColor(wm.renderer, 0, 0, 0, 255)
 	sdl.RenderClear(wm.renderer)
+
+	color_buffer.render()
+	color_buffer.clear(0xFFFFFF00)
 
 	sdl.RenderPresent(wm.renderer)
 }
