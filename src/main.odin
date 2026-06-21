@@ -35,7 +35,7 @@ update :: proc() {
 }
 
 render :: proc() {
-	sdl.SetRenderDrawColor(renderer, 25, 0, 0, 255)
+	sdl.SetRenderDrawColor(renderer, 255, 0, 0, 255)
 	sdl.RenderClear(renderer)
 
 	sdl.RenderPresent(renderer)
@@ -52,10 +52,18 @@ main :: proc() {
 	}
 
 	is_running = true;
+	
+	when ODIN_DEBUG {
+		log.info("Starting program loop")
+	}
 
 	for is_running {
 		process_input()
 		update()
 		render()
+	}
+
+	when ODIN_DEBUG {
+		log.info("Finish program loop and terminate the program")
 	}
 }
