@@ -12,13 +12,16 @@ init_color_buffer :: proc(buffer_size: u32) -> (err: mem.Allocator_Error) {
 
     color_buffer, err = make([]u32, buffer_size)
 
+    if err != nil {
+        color_buffer = {0xFFFF0000}
+    }
     if ODIN_DEBUG {
         if err != nil {
             log.fatal("Color buffer was NOT initialized.")
         }   
         else {
             size := size_of(color_buffer)
-            log.info("Color buffer initialized. Size %d bytes.", size)
+            log.infof("Color buffer initialized. Size %d bytes.", size)
         }
     }    
 
