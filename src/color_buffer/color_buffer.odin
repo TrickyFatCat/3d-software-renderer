@@ -15,20 +15,38 @@ get :: proc() -> []u32 {
 	return color_buffer
 }
 
-init :: proc() -> (err: mem.Allocator_Error) {
+init :: proc() -> (success: bool) {
 	when ODIN_DEBUG {
 		log.info("Start color buffer initialization.")
 	}
 
+	err := create_buffer()
+	ok := create_texture()
+ 
+	success = err == nil && ok
+	
+	if ODIN_DEBUG {
+		if success {
+			log.info("Color buffer successfully initialized.")
+		} else {
+			log.error("Color buffer initialization failed.")
+		}
+	}
+
+	return success
+}
+
+@(private)
+create_buffer :: proc() -> (err: mem.Allocator_Error) {
 	buffer_size :: wm.WINDOW_WIDTH * wm.WINDOW_HEIGHT
 	color_buffer, err = make([]u32, buffer_size)
 
 	if ODIN_DEBUG {
 		if err != nil {
-			log.fatal("Color buffer was NOT initialized.")
+			log.fatal("Failed to create color buffer.")
 		} else {
 			size := size_of(color_buffer)
-			log.infof("Color buffer initialized. Size %d bytes.", size)
+			log.infof("Color buffer created. Size %d bytes.", size)
 		}
 	}
 
@@ -59,10 +77,11 @@ get_texture :: proc() -> ^sdl.Texture {
 	return color_buffer_texture
 }
 
-init_texture :: proc() -> bool {
+@(private)
+create_texture :: proc() -> bool {
 	if wm.renderer == nil {
 		when ODIN_DEBUG {
-			log.error("Failed to create color_buffer_texture, renderer is null")
+			log.error("Failed to create color buffer texture, renderer is null")
 		}
 
 		return false
@@ -77,7 +96,7 @@ init_texture :: proc() -> bool {
 	)
 
 	if ODIN_DEBUG && color_buffer_texture == nil {
-		log.fatal("Failed to create color_buffer texture.")
+		log.fatal("Failed to create color buffer texture.")
 		return false
 	}
 

@@ -14,7 +14,6 @@ setup :: proc() -> (success: bool) {
 
 	if success {
 		color_buffer.init()
-		color_buffer.init_texture()
 	}
 
 	return success
