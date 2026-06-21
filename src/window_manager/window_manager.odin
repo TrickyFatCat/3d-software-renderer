@@ -3,11 +3,14 @@ package window_manager
 import "core:log"
 import sdl "vendor:sdl2"
 
+window: ^sdl.Window = nil
+renderer: ^sdl.Renderer = nil
+
 WINDOW_WIDTH : i32 : 800
 WINDOW_HEIGHT : i32 : 600
 
 @require_results
-init_window :: proc() -> (window : ^sdl.Window, renderer : ^sdl.Renderer, success: bool){
+init_window :: proc() -> (success: bool){
 	when ODIN_DEBUG {
 		log.info("Start SDL initialization.")
 	}
@@ -15,7 +18,7 @@ init_window :: proc() -> (window : ^sdl.Window, renderer : ^sdl.Renderer, succes
 	if sdl.Init(sdl.INIT_EVERYTHING) != 0 {
 		log.fatal("Failed to initialize SDL.\n")
 	success = false
-	return nil, nil, success
+	return success
 	}
 	
 	window = sdl.CreateWindow(
@@ -30,7 +33,7 @@ init_window :: proc() -> (window : ^sdl.Window, renderer : ^sdl.Renderer, succes
 	if window == nil {
 		log.fatal("Failed to create window.\n")
 		success = false
-		return nil, nil, success
+		return success
 	}
 
 	renderer = sdl.CreateRenderer(window, -1, sdl.RENDERER_SOFTWARE)
@@ -38,7 +41,7 @@ init_window :: proc() -> (window : ^sdl.Window, renderer : ^sdl.Renderer, succes
 	if renderer == nil {
 		log.fatal("Failed to create renderer.\n")
 		success = false
-		return nil, nil, success
+		return success
 	}
 
 	success = true
@@ -47,5 +50,19 @@ init_window :: proc() -> (window : ^sdl.Window, renderer : ^sdl.Renderer, succes
 		log.info("SDL successfully initialized.")
 	}
 
-	return window, renderer, success
+	return success
+}
+
+destroy_window :: proc() {
+	when ODIN_DEBUG {
+		log.info("Start destroying window and renderer.")
+	}
+
+	sdl.DestroyWindow(window)
+	sdl.DestroyRenderer(renderer)
+	sdl.Quit()
+
+	when ODIN_DEBUG {
+		log.info("Finish destroying window and renderer.")
+	}
 }
