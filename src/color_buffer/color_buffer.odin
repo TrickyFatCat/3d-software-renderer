@@ -1,6 +1,6 @@
 package color_buffer
 
-import wm "../window_manager"
+import "../window"
 import "core:log"
 import "core:mem"
 import sdl "vendor:sdl2"
@@ -38,7 +38,7 @@ init :: proc() -> (success: bool) {
 
 @(private)
 create_buffer :: proc() -> (err: mem.Allocator_Error) {
-	buffer_size :: wm.WINDOW_WIDTH * wm.WINDOW_HEIGHT
+	buffer_size :: window.WINDOW_WIDTH * window.WINDOW_HEIGHT
 	color_buffer, err = make([]u32, buffer_size)
 
 	if ODIN_DEBUG {
@@ -62,9 +62,9 @@ destroy :: proc() {
 }
 
 render :: proc() {
-	pitch :: wm.WINDOW_WIDTH * size_of(u32)
+	pitch :: window.WINDOW_WIDTH * size_of(u32)
 	sdl.UpdateTexture(color_buffer_texture, nil, raw_data(color_buffer), pitch)
-	sdl.RenderCopy(wm.renderer, color_buffer_texture, nil, nil)
+	sdl.RenderCopy(window.get_renderer(), color_buffer_texture, nil, nil)
 }
 
 clear :: proc(color: u32) {
@@ -79,7 +79,9 @@ get_texture :: proc() -> ^sdl.Texture {
 
 @(private)
 create_texture :: proc() -> bool {
-	if wm.renderer == nil {
+	renderer := window.get_renderer()
+
+	if renderer == nil {
 		when ODIN_DEBUG {
 			log.error("Failed to create color buffer texture, renderer is null")
 		}
@@ -88,11 +90,11 @@ create_texture :: proc() -> bool {
 	}
 
 	color_buffer_texture = sdl.CreateTexture(
-		wm.renderer,
+		renderer,
 		sdl.PixelFormatEnum.ARGB8888,
 		sdl.TextureAccess.STREAMING,
-		wm.WINDOW_WIDTH,
-		wm.WINDOW_HEIGHT,
+		window.WINDOW_WIDTH,
+		window.WINDOW_HEIGHT,
 	)
 
 	if ODIN_DEBUG && color_buffer_texture == nil {

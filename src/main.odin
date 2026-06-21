@@ -3,17 +3,17 @@ package main
 import "core:fmt"
 import "core:log"
 import "core:mem"
-import wm "window_manager"
+import "window"
 import "color_buffer"
 import sdl "vendor:sdl2"
 
 is_running: bool = false
 
 setup :: proc() -> (success: bool) {
-	success = wm.init_window()
+	success = window.init()
 
 	if success {
-		color_buffer.init()
+		success = color_buffer.init()
 	}
 
 	return success
@@ -21,7 +21,7 @@ setup :: proc() -> (success: bool) {
 
 cleanup :: proc() {
 	color_buffer.destroy()
-	wm.destroy_window()
+	window.destroy()
 }
 
 process_input :: proc() {
@@ -50,13 +50,13 @@ update :: proc() {
 }
 
 render :: proc() {
-	sdl.SetRenderDrawColor(wm.renderer, 0, 0, 0, 255)
-	sdl.RenderClear(wm.renderer)
+	sdl.SetRenderDrawColor(window.get_renderer(), 0, 0, 0, 255)
+	sdl.RenderClear(window.get_renderer())
 
 	color_buffer.render()
 	color_buffer.clear(0xFFFFFF00)
 
-	sdl.RenderPresent(wm.renderer)
+	sdl.RenderPresent(window.get_renderer())
 }
 
 main :: proc() {
