@@ -75,6 +75,24 @@ clear :: proc(color: u32) {
 	}
 }
 
+set_color :: proc(p_index: int, color: u32) {
+	buffer_len := len(color_buffer)
+	if buffer_len == 0 {
+		when ODIN_DEBUG {
+			log.error("Can not change color buffer pixel. Color buffer is empty.")
+		}
+	}
+
+	if p_index < 0 || p_index > buffer_len{
+		when ODIN_DEBUG {
+			log.error("Can not change color buffer pixel. Invalid p_index.")
+		}
+
+		return
+	}
+
+	color_buffer[p_index] = color
+}
 get_texture :: proc() -> ^sdl.Texture {
 	return color_buffer_texture
 }

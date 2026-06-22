@@ -49,14 +49,27 @@ update :: proc() {
 
 }
 
+draw_grid :: proc(step: int, color: u32) {
+	width, height := window.get_dimentions()
+
+	for y: int; y < int(height); y += step {
+		for x: int; x < int(width); x += step {
+			pixel_i := (int(width) * y) + x
+			color_buffer.set_color(pixel_i, color)
+		}
+	}
+}
+
 render :: proc() {
 	renderer: ^sdl.Renderer = window.get_renderer()
 
 	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
 	sdl.RenderClear(renderer)
 
+	draw_grid(10, 0xFFFF0000)
+
 	color_buffer.render()
-	color_buffer.clear(0xFFFFFF00)
+	color_buffer.clear(0xFF000000)
 
 	sdl.RenderPresent(renderer)
 }
