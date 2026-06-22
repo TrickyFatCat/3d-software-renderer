@@ -8,8 +8,10 @@ window: ^sdl.Window = nil
 @(private)
 renderer: ^sdl.Renderer = nil
 
-WINDOW_WIDTH : i32 : 800
-WINDOW_HEIGHT : i32 : 600
+@(private)
+width: u32 = 800
+@(private)
+height: u32 = 600
 
 @(require_results)
 init :: proc() -> (success: bool) {
@@ -22,6 +24,10 @@ init :: proc() -> (success: bool) {
 	renderer_ok := create_renderer()
 
 	success = sdl_ok && window_ok && renderer_ok
+
+	if success {
+		sdl.SetWindowFullscreen(window, sdl.WINDOW_FULLSCREEN)
+	}
 
 	if ODIN_DEBUG {
 		if success {
@@ -36,6 +42,10 @@ init :: proc() -> (success: bool) {
 
 get :: proc() -> (^sdl.Window) {
 	return window
+}
+
+get_dimentions :: proc() -> (u32, u32) {
+	return width, height
 }
 
 @(private)
@@ -55,12 +65,18 @@ init_sdl :: proc() -> (success: bool) {
 
 @(private)
 create_window :: proc() -> (success: bool) {
+	display_mode: sdl.DisplayMode
+	sdl.GetCurrentDisplayMode(0, &display_mode)
+
+	width = u32(display_mode.w)
+	height = u32(display_mode.h)
+
 	window = sdl.CreateWindow(
 		nil,
 		sdl.WINDOWPOS_CENTERED,
 		sdl.WINDOWPOS_CENTERED,
-		WINDOW_WIDTH,
-		WINDOW_HEIGHT,
+		i32(width),
+		i32(height),
 		sdl.WINDOW_BORDERLESS
 	)
 
@@ -90,16 +106,12 @@ create_renderer :: proc() -> (success: bool) {
 }
 
 destroy :: proc() {
-	when ODIN_DEBUG {
-		log.info("Start destroying window and renderer.")
-	}
-
 	sdl.DestroyWindow(window)
 	sdl.DestroyRenderer(renderer)
 	sdl.Quit()
 
 	when ODIN_DEBUG {
-		log.info("Finish destroying window and renderer.")
+		log.info("Window and renderer are destroyed.")
 	}
 }
 

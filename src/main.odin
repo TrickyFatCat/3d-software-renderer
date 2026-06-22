@@ -50,13 +50,15 @@ update :: proc() {
 }
 
 render :: proc() {
-	sdl.SetRenderDrawColor(window.get_renderer(), 0, 0, 0, 255)
-	sdl.RenderClear(window.get_renderer())
+	renderer: ^sdl.Renderer = window.get_renderer()
+
+	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
+	sdl.RenderClear(renderer)
 
 	color_buffer.render()
 	color_buffer.clear(0xFFFFFF00)
 
-	sdl.RenderPresent(window.get_renderer())
+	sdl.RenderPresent(renderer)
 }
 
 main :: proc() {

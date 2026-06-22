@@ -38,7 +38,8 @@ init :: proc() -> (success: bool) {
 
 @(private)
 create_buffer :: proc() -> (err: mem.Allocator_Error) {
-	buffer_size :: window.WINDOW_WIDTH * window.WINDOW_HEIGHT
+	width, height := window.get_dimentions()
+	buffer_size := width * height
 	color_buffer, err = make([]u32, buffer_size)
 
 	if ODIN_DEBUG {
@@ -62,8 +63,9 @@ destroy :: proc() {
 }
 
 render :: proc() {
-	pitch :: window.WINDOW_WIDTH * size_of(u32)
-	sdl.UpdateTexture(color_buffer_texture, nil, raw_data(color_buffer), pitch)
+	width, _ := window.get_dimentions()
+	pitch := width * size_of(u32)
+	sdl.UpdateTexture(color_buffer_texture, nil, raw_data(color_buffer), i32(pitch))
 	sdl.RenderCopy(window.get_renderer(), color_buffer_texture, nil, nil)
 }
 
@@ -89,12 +91,13 @@ create_texture :: proc() -> bool {
 		return false
 	}
 
+	width, height := window.get_dimentions()
 	color_buffer_texture = sdl.CreateTexture(
 		renderer,
 		sdl.PixelFormatEnum.ARGB8888,
 		sdl.TextureAccess.STREAMING,
-		window.WINDOW_WIDTH,
-		window.WINDOW_HEIGHT,
+		i32(width),
+		i32(height),
 	)
 
 	if ODIN_DEBUG && color_buffer_texture == nil {
