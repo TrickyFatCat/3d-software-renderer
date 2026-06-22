@@ -75,7 +75,7 @@ clear :: proc(color: u32) {
 	}
 }
 
-set_color :: proc(p_index: int, color: u32) {
+set_pixel_color :: proc(p_index: int, color: u32) {
 	buffer_len := len(color_buffer)
 	if buffer_len == 0 {
 		when ODIN_DEBUG {

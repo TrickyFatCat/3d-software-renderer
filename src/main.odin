@@ -55,7 +55,7 @@ draw_grid :: proc(step: int, color: u32) {
 	for y: int; y < int(height); y += step {
 		for x: int; x < int(width); x += step {
 			pixel_i := (int(width) * y) + x
-			color_buffer.set_color(pixel_i, color)
+			color_buffer.set_pixel_color(pixel_i, color)
 		}
 	}
 }
