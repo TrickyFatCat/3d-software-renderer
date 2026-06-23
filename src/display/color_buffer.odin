@@ -1,6 +1,5 @@
-package color_buffer
+package display
 
-import "../window"
 import "core:log"
 import "core:mem"
 import sdl "vendor:sdl2"
@@ -11,11 +10,12 @@ color_buffer: []u32 = nil
 @(private)
 color_buffer_texture: ^sdl.Texture = nil
 
-get :: proc() -> []u32 {
+get_color_buffer :: proc() -> []u32 {
 	return color_buffer
 }
 
-init :: proc() -> (success: bool) {
+@(private)
+init_color_buffer :: proc() -> (success: bool) {
 	when ODIN_DEBUG {
 		log.info("Start color buffer initialization.")
 	}
@@ -38,8 +38,7 @@ init :: proc() -> (success: bool) {
 
 @(private)
 create_buffer :: proc() -> (err: mem.Allocator_Error) {
-	width, height := window.get_dimentions()
-	buffer_size := width * height
+	buffer_size := window_width * window_height
 	color_buffer, err = make([]u32, buffer_size)
 
 	if ODIN_DEBUG {
@@ -54,7 +53,8 @@ create_buffer :: proc() -> (err: mem.Allocator_Error) {
 	return err
 }
 
-destroy :: proc() {
+@(private)
+destroy_color_buffer :: proc() {
 	delete(color_buffer)
 
 	when ODIN_DEBUG {
@@ -63,10 +63,9 @@ destroy :: proc() {
 }
 
 render :: proc() {
-	width, _ := window.get_dimentions()
-	pitch := width * size_of(u32)
+	pitch := window_width * size_of(u32)
 	sdl.UpdateTexture(color_buffer_texture, nil, raw_data(color_buffer), i32(pitch))
-	sdl.RenderCopy(window.get_renderer(), color_buffer_texture, nil, nil)
+	sdl.RenderCopy(renderer, color_buffer_texture, nil, nil)
 }
 
 clear :: proc(color: u32) {
@@ -93,13 +92,14 @@ set_pixel_color :: proc(p_index: int, color: u32) {
 
 	color_buffer[p_index] = color
 }
-get_texture :: proc() -> ^sdl.Texture {
+
+get_color_buffer_texture :: proc() -> ^sdl.Texture {
 	return color_buffer_texture
 }
 
 @(private)
 create_texture :: proc() -> bool {
-	renderer := window.get_renderer()
+	renderer := get_renderer()
 
 	if renderer == nil {
 		when ODIN_DEBUG {
@@ -109,13 +109,12 @@ create_texture :: proc() -> bool {
 		return false
 	}
 
-	width, height := window.get_dimentions()
 	color_buffer_texture = sdl.CreateTexture(
 		renderer,
 		sdl.PixelFormatEnum.ARGB8888,
 		sdl.TextureAccess.STREAMING,
-		i32(width),
-		i32(height),
+		i32(window_width),
+		i32(window_height),
 	)
 
 	if ODIN_DEBUG && color_buffer_texture == nil {

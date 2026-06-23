@@ -1,4 +1,4 @@
-package window
+package display
 
 import "core:log"
 import sdl "vendor:sdl2"
@@ -9,12 +9,12 @@ window: ^sdl.Window = nil
 renderer: ^sdl.Renderer = nil
 
 @(private)
-width: u32 = 800
+window_width: u32 = 800
 @(private)
-height: u32 = 600
+window_height: u32 = 600
 
-@(require_results)
-init :: proc() -> (success: bool) {
+@(private)
+init_window :: proc() -> (success: bool) {
 	when ODIN_DEBUG {
 		log.info("Start initializing window.")
 	}
@@ -40,12 +40,12 @@ init :: proc() -> (success: bool) {
 	return success
 }
 
-get :: proc() -> (^sdl.Window) {
+get_window :: proc() -> (^sdl.Window) {
 	return window
 }
 
-get_dimentions :: proc() -> (u32, u32) {
-	return width, height
+get_window_dimentions :: proc() -> (u32, u32) {
+	return window_width, window_height
 }
 
 @(private)
@@ -68,15 +68,15 @@ create_window :: proc() -> (success: bool) {
 	display_mode: sdl.DisplayMode
 	sdl.GetCurrentDisplayMode(0, &display_mode)
 
-	width = u32(display_mode.w)
-	height = u32(display_mode.h)
+	window_width = u32(display_mode.w)
+	window_height = u32(display_mode.h)
 
 	window = sdl.CreateWindow(
 		nil,
 		sdl.WINDOWPOS_CENTERED,
 		sdl.WINDOWPOS_CENTERED,
-		i32(width),
-		i32(height),
+		i32(window_width),
+		i32(window_height),
 		sdl.WINDOW_BORDERLESS
 	)
 
@@ -105,7 +105,8 @@ create_renderer :: proc() -> (success: bool) {
 	return success
 }
 
-destroy :: proc() {
+@(private)
+destroy_window :: proc() {
 	sdl.DestroyWindow(window)
 	sdl.DestroyRenderer(renderer)
 	sdl.Quit()

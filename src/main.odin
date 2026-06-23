@@ -3,25 +3,18 @@ package main
 import "core:fmt"
 import "core:log"
 import "core:mem"
-import "window"
-import "color_buffer"
+import "display"
 import sdl "vendor:sdl2"
 
 is_running: bool = false
 
 setup :: proc() -> (success: bool) {
-	success = window.init()
-
-	if success {
-		success = color_buffer.init()
-	}
-
+	success = display.init()
 	return success
 }
 
 cleanup :: proc() {
-	color_buffer.destroy()
-	window.destroy()
+	display.deinit()
 }
 
 process_input :: proc() {
@@ -49,27 +42,18 @@ update :: proc() {
 
 }
 
-draw_grid :: proc(step: int, color: u32) {
-	width, height := window.get_dimentions()
-
-	for y: int; y < int(height); y += step {
-		for x: int; x < int(width); x += step {
-			pixel_i := (int(width) * y) + x
-			color_buffer.set_pixel_color(pixel_i, color)
-		}
-	}
-}
 
 render :: proc() {
-	renderer: ^sdl.Renderer = window.get_renderer()
+	renderer: ^sdl.Renderer = display.get_renderer()
 
 	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
 	sdl.RenderClear(renderer)
+ 
+	display.draw_rec(200, 600, 200, 300, 0xFFFFFF00)
+	display.draw_grid(10, 0xFFFF0000)
 
-	draw_grid(10, 0xFFFF0000)
-
-	color_buffer.render()
-	color_buffer.clear(0xFF000000)
+	display.render()
+	display.clear(0xFF000000)
 
 	sdl.RenderPresent(renderer)
 }
