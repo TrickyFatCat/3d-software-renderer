@@ -1,5 +1,7 @@
 package display
 
+import sdl "vendor:sdl2"
+
 init :: proc() -> (success: bool) {
     success = init_window()
 
@@ -14,7 +16,18 @@ deinit :: proc() {
     destroy_color_buffer()
     destroy_window()
 }
-    
+
+start_render :: proc() {
+	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
+	sdl.RenderClear(renderer)
+}
+
+finish_render :: proc(clear_color: u32 = 0xFF000000) {
+	render_color_buffer_texture()
+	clear_color_buffer(clear_color)
+	sdl.RenderPresent(renderer)
+}
+
 draw_grid :: proc(step: int, color: u32) {
 	for y: int; y < int(window_height); y += step {
 		for x: int; x < int(window_width); x += step {

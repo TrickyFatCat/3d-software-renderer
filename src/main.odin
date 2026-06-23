@@ -44,18 +44,12 @@ update :: proc() {
 
 
 render :: proc() {
-	renderer: ^sdl.Renderer = display.get_renderer()
+	display.start_render()
 
-	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
-	sdl.RenderClear(renderer)
- 
 	display.draw_rec(200, 600, 200, 300, 0xFFFFFF00)
 	display.draw_grid(10, 0xFFFF0000)
 
-	display.render()
-	display.clear(0xFF000000)
-
-	sdl.RenderPresent(renderer)
+	display.finish_render()
 }
 
 main :: proc() {

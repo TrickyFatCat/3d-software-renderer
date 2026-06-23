@@ -62,13 +62,15 @@ destroy_color_buffer :: proc() {
 	}
 }
 
-render :: proc() {
+@(private)
+render_color_buffer_texture :: proc() {
 	pitch := window_width * size_of(u32)
 	sdl.UpdateTexture(color_buffer_texture, nil, raw_data(color_buffer), i32(pitch))
 	sdl.RenderCopy(renderer, color_buffer_texture, nil, nil)
 }
 
-clear :: proc(color: u32) {
+@(private)
+clear_color_buffer :: proc(color: u32) {
 	for &c in color_buffer {
 		c = color
 	}
