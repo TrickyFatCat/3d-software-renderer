@@ -25,7 +25,7 @@ init_color_buffer :: proc() -> (success: bool) {
  
 	success = err == nil && ok
 	
-	if ODIN_DEBUG {
+	when ODIN_DEBUG {
 		if success {
 			log.info("Color buffer successfully initialized.")
 		} else {
@@ -41,11 +41,11 @@ create_buffer :: proc() -> (err: mem.Allocator_Error) {
 	buffer_size := window_width * window_height
 	color_buffer, err = make([]u32, buffer_size)
 
-	if ODIN_DEBUG {
+	when ODIN_DEBUG {
 		if err != nil {
 			log.fatal("Failed to create color buffer.")
 		} else {
-			size := size_of(color_buffer)
+			size := size_of(color_buffer) * len(color_buffer)
 			log.infof("Color buffer created. Size %d bytes.", size)
 		}
 	}
@@ -119,8 +119,10 @@ create_texture :: proc() -> bool {
 		i32(window_height),
 	)
 
-	if ODIN_DEBUG && color_buffer_texture == nil {
-		log.fatal("Failed to create color buffer texture.")
+	if color_buffer_texture == nil {
+		when ODIN_DEBUG {
+			log.fatal("Failed to create color buffer texture.")
+		}
 		return false
 	}
 
