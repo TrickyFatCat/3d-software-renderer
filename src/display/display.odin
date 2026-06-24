@@ -35,8 +35,7 @@ draw_grid :: proc(step: int, color: u32) {
 				continue
 			}		
 			
-			pixel_i := (int(window_width) * y) + x
-			set_pixel_color(pixel_i, color)
+			draw_pixel(x, y, color)
 		}
 	}
 }
@@ -44,9 +43,16 @@ draw_grid :: proc(step: int, color: u32) {
 draw_rec :: proc(x: i32, y: i32, width: i32, height: i32, color: u32) {
 	for cur_y := y; cur_y < y + height; cur_y += 1 {
 		for cur_x := x; cur_x < x + width; cur_x += 1 {
-			pixel_i := int(i32(window_width) * cur_y + cur_x)	
-			set_pixel_color(pixel_i, color)
+			draw_pixel(int(cur_x), int(cur_y), color)
 		}
 	}
+}
 
+draw_pixel :: proc(x: int, y: int, color: u32) {
+	if (x > int(window_height) && y > int(window_height)) {
+		return
+	}
+
+	pixel_index := int(window_width) * y + x
+	set_pixel_color(pixel_index, color)
 }
