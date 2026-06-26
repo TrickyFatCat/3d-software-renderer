@@ -29,7 +29,7 @@ init_window :: proc() -> (success: bool) {
 		sdl.SetWindowFullscreen(window, sdl.WINDOW_FULLSCREEN)
 	}
 
-	if ODIN_DEBUG {
+	when ODIN_DEBUG {
 		if success {
 			log.info("Window successfully initialized.")
 		} else {
@@ -46,6 +46,10 @@ get_window :: proc() -> (^sdl.Window) {
 
 get_window_dimentions :: proc() -> (u32, u32) {
 	return window_width, window_height
+}
+
+get_window_middle :: proc() -> (u32, u32) {
+	return window_width / 2, window_height / 2
 }
 
 @(private)
