@@ -44,7 +44,6 @@ update :: proc() {
 
 
 render :: proc() {
-	display.start_render()
 
 	display.draw_rec(200, 600, 200, 300, 0xFFFFFF00)
 	display.draw_grid(10, 0xFFFF0000)

@@ -17,11 +17,6 @@ deinit :: proc() {
     destroy_window()
 }
 
-start_render :: proc() {
-	sdl.SetRenderDrawColor(renderer, 0, 0, 0, 255)
-	sdl.RenderClear(renderer)
-}
-
 finish_render :: proc(clear_color: u32 = 0xFF000000) {
 	render_color_buffer_texture()
 	clear_color_buffer(clear_color)
@@ -49,7 +44,7 @@ draw_rec :: proc(x: i32, y: i32, width: i32, height: i32, color: u32) {
 }
 
 draw_pixel :: proc(x: int, y: int, color: u32) {
-	if (x > int(window_height) && y > int(window_height)) {
+	if (x < 0 && x > int(window_height) && y < 0 && y > int(window_height)) {
 		return
 	}
 
