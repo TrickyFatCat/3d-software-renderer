@@ -16,6 +16,7 @@ camera_pos: math.vec3 = { x = 0.0, y = 0.0, z = -5.0}
 cube_rotation: math.vec3 = { x = 0.0, y = 0.0, z = 0.0}
 
 is_running: bool = false
+previous_frame_time: u32 = 0
 
 setup :: proc() -> (success: bool) {
 	success = display.init()
@@ -68,6 +69,12 @@ project :: proc (point: ^math.vec3) -> (projected_point: math.vec2) {
 }
 
 update :: proc() {
+	time_to_wait: u32 = display.FRAME_TARGET_TIME - (sdl.GetTicks() - previous_frame_time)
+
+	if time_to_wait > 0 && time_to_wait <= display.FRAME_TARGET_TIME {
+		sdl.Delay(time_to_wait)
+	}
+
 	cube_rotation.x += 0.1
 	cube_rotation.y += 0.1
 	cube_rotation.z += 0.1

@@ -2,6 +2,9 @@ package display
 
 import sdl "vendor:sdl2"
 
+FPS :: 30
+FRAME_TARGET_TIME :: 1000 / FPS
+
 init :: proc() -> (success: bool) {
     success = init_window()
 
