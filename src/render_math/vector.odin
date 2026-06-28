@@ -1,9 +1,35 @@
 package render_math
 
+import "core:math"
+
 vec2 :: struct {
     x, y : f32
 }
 
 vec3 :: struct {
     x, y, z : f32
+}
+
+vec3_rotate_x :: proc(v: ^vec3, angle: f32) -> (rotated_vector: vec3) {
+    angle := math.to_radians(angle)
+    rotated_vector.x = v.x
+    rotated_vector.y = v.y * math.cos(angle) - v.z * math.sin(angle)
+    rotated_vector.z = v.y * math.sin(angle) + v.z * math.cos(angle)
+    return rotated_vector
+}
+
+vec3_rotate_y :: proc(v: ^vec3, angle: f32) -> (rotated_vector: vec3) {
+    angle := math.to_radians(angle)
+    rotated_vector.x = v.x * math.cos(angle) - v.z * math.sin(angle)
+    rotated_vector.y = v.y
+    rotated_vector.z = v.x * math.sin(angle) + v.z * math.cos(angle)
+    return rotated_vector
+}
+
+vec3_rotate_z :: proc(v: ^vec3, angle: f32) -> (rotated_vector: vec3) {
+    angle := math.to_radians(angle)
+    rotated_vector.x = v.x * math.cos(angle) - v.y * math.sin(angle)
+    rotated_vector.y = v.x * math.sin(angle) + v.y * math.cos(angle)
+    rotated_vector.z = v.z
+    return rotated_vector
 }

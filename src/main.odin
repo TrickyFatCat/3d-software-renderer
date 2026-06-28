@@ -11,7 +11,9 @@ N_POINTS :: 9 * 9 * 9
 cube_points : [N_POINTS]math.vec3
 projecteds_points : [N_POINTS]math.vec2
 fov_factor :f32: 640
+
 camera_pos: math.vec3 = { x = 0.0, y = 0.0, z = -5.0}
+cube_rotation: math.vec3 = { x = 0.0, y = 0.0, z = 0.0}
 
 is_running: bool = false
 
@@ -60,16 +62,25 @@ process_input :: proc() {
 }
 
 project :: proc (point: ^math.vec3) -> (projected_point: math.vec2) {
-	 projected_point.x = (point.x * fov_factor) / point.z
-	 projected_point.y = (point.y * fov_factor) / point.z
+	 projected_point.x = (fov_factor * point.x) / point.z
+	 projected_point.y = (fov_factor * point.y) / point.z
 	 return projected_point
 }
 
 update :: proc() {
-	for point, i in cube_points {
-		point := point
-		point.z -= camera_pos.z
-		projected_point := project(&point)
+	cube_rotation.x += 0.1
+	cube_rotation.y += 0.1
+	cube_rotation.z += 0.1
+
+	 for &point, i in cube_points {
+		transformed_point := point
+
+		transformed_point = math.vec3_rotate_x(&transformed_point, cube_rotation.x)
+		transformed_point = math.vec3_rotate_y(&transformed_point, cube_rotation.y)
+		transformed_point = math.vec3_rotate_z(&transformed_point, cube_rotation.z)
+		transformed_point.z -= camera_pos.z
+
+		projected_point := project(&transformed_point)
 		projecteds_points[i] = projected_point
 	}
 }
