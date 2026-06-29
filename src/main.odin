@@ -5,15 +5,15 @@ import "core:log"
 import "core:mem"
 import "display"
 import math "render_math"
+import "mesh"
 import sdl "vendor:sdl2"
 
-N_POINTS :: 9 * 9 * 9
-cube_points : [N_POINTS]math.vec3
-projecteds_points : [N_POINTS]math.vec2
-fov_factor :f32: 640
+triangles_to_render: [mesh.N_FACES]mesh.Triangle
 
-camera_pos: math.vec3 = { x = 0.0, y = 0.0, z = -5.0}
-cube_rotation: math.vec3 = { x = 0.0, y = 0.0, z = 0.0}
+camera_pos: math.Vec3 = { x = 0.0, y = 0.0, z = -5.0}
+cube_rotation: math.Vec3 = { x = 0.0, y = 0.0, z = 0.0}
+
+fov_factor :f32: 640
 
 is_running: bool = false
 previous_frame_time: u32 = 0
@@ -22,16 +22,7 @@ setup :: proc() -> (success: bool) {
 	success = display.init()
 
 	if success {
-		point_index: int
-		for x: f32 = -1; x <= 1; x += 0.25 {
-			for y: f32 = -1; y <= 1; y += 0.25 {
-				for z: f32 = -1; z <= 1; z += 0.25 {
-					new_point: math.vec3 = {x, y, z}
-					cube_points[point_index] = new_point
-					point_index += 1
-				}
-			}
-		}
+
 	}
 
 	return success
@@ -62,7 +53,7 @@ process_input :: proc() {
 	}
 }
 
-project :: proc (point: ^math.vec3) -> (projected_point: math.vec2) {
+project :: proc (point: ^math.Vec3) -> (projected_point: math.Vec2) {
 	 projected_point.x = (fov_factor * point.x) / point.z
 	 projected_point.y = (fov_factor * point.y) / point.z
 	 return projected_point
@@ -79,16 +70,39 @@ update :: proc() {
 	cube_rotation.y += 0.1
 	cube_rotation.z += 0.1
 
-	 for &point, i in cube_points {
-		transformed_point := point
+	w, h := display.get_window_middle()
 
-		transformed_point = math.vec3_rotate_x(&transformed_point, cube_rotation.x)
-		transformed_point = math.vec3_rotate_y(&transformed_point, cube_rotation.y)
-		transformed_point = math.vec3_rotate_z(&transformed_point, cube_rotation.z)
-		transformed_point.z -= camera_pos.z
+	// Loop all triangle faces in our mesh
+	for &face, i in mesh.faces {
+		face_vertices: [3]math.Vec3;
+		face_vertices[0] = mesh.vertices[face.a - 1]
+		face_vertices[1] = mesh.vertices[face.b - 1]
+		face_vertices[2] = mesh.vertices[face.c - 1]
 
-		projected_point := project(&transformed_point)
-		projecteds_points[i] = projected_point
+		projected_triangle: mesh.Triangle
+
+		// Loop all three vertices of a face and apply transformation
+		for &vertex, i in face_vertices {
+			transformed_vertex := vertex
+			transformed_vertex = math.vec3_rotate_x(&transformed_vertex, cube_rotation.x)
+			transformed_vertex = math.vec3_rotate_y(&transformed_vertex, cube_rotation.y)
+			transformed_vertex = math.vec3_rotate_z(&transformed_vertex, cube_rotation.z)
+
+			// Translate the vertex from the camera
+			transformed_vertex.z -= camera_pos.z
+
+			// Project current vertex
+			projected_point: math.Vec2 = project(&transformed_vertex)
+
+			// Scale and translate projected points to the middle of the screen
+			projected_point.x += f32(w)
+			projected_point.y += f32(h)
+
+			projected_triangle.points[i] = projected_point
+		}
+
+		// Save the projected triangle in the array of triangles to render
+		triangles_to_render[i] = projected_triangle
 	}
 }
 
@@ -99,8 +113,14 @@ render :: proc() {
 
 	w, h := display.get_window_middle()
 
-	for &point, i in projecteds_points {
-		display.draw_rec(i32(point.x) + i32(w), i32(point.y) + i32(h), 4, 4, 0xFFFFFF00)
+	// Loop all projected triangles and render them
+	for &triangle in triangles_to_render {
+		i := 0
+		for i in 0..<3 {
+			x: i32 = i32(triangle.points[i].x)
+			y: i32 = i32(triangle.points[i].y)
+			display.draw_rec(x, y, 3, 3, 0xFFFFFF00)
+		}
 	}
 
 	display.finish_render()
