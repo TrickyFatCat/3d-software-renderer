@@ -84,11 +84,7 @@ set_pixel_color :: proc(p_index: int, color: u32) {
 		}
 	}
 
-	if p_index < 0 || p_index > buffer_len{
-		when ODIN_DEBUG {
-			log.error("Can not change color buffer pixel. Invalid p_index.")
-		}
-
+	if p_index < 0 || p_index >= buffer_len{
 		return
 	}
 
