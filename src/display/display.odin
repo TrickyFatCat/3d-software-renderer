@@ -1,7 +1,6 @@
 package display
 
 import "core:math"
-import "../mesh"
 import sdl "vendor:sdl2"
 
 FPS :: 30
