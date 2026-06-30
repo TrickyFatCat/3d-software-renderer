@@ -2,13 +2,9 @@ package render_math
 
 import "core:math"
 
-Vec2 :: struct {
-    x, y : f32
-}
+Vec2 :: struct { x, y : f32 }
 
-Vec3 :: struct {
-    x, y, z : f32
-}
+Vec3 :: struct { x, y, z : f32 }
 
 vec3_rotate_x :: proc(v: ^Vec3, angle: f32) -> (rotated_vector: Vec3) {
     angle := math.to_radians(angle)

@@ -116,11 +116,19 @@ render :: proc() {
 	// Loop all projected triangles and render them
 	for &triangle in triangles_to_render {
 		i := 0
+
+		// Draw vertices
 		for i in 0..<3 {
 			x: i32 = i32(triangle.points[i].x)
 			y: i32 = i32(triangle.points[i].y)
 			display.draw_rec(x, y, 3, 3, 0xFFFFFF00)
 		}
+
+		// Draw triangle edges
+		display.draw_triangle(i32(triangle.points[0].x), i32(triangle.points[0].y),
+							  i32(triangle.points[1].x), i32(triangle.points[1].y),
+							  i32(triangle.points[2].x), i32(triangle.points[2].y),
+							  0xFF00FF00)
 	}
 
 	display.finish_render()
