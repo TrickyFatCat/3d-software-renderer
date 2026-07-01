@@ -8,11 +8,9 @@ import math "render_math"
 import "mesh"
 import sdl "vendor:sdl2"
 
-triangles_to_render: [mesh.N_FACES]mesh.Triangle
+triangles_to_render: [dynamic]mesh.Triangle = nil
 
 camera_pos: math.Vec3 = { x = 0.0, y = 0.0, z = -5.0}
-cube_rotation: math.Vec3 = { x = 0.0, y = 0.0, z = 0.0}
-
 fov_factor :f32: 640
 
 is_running: bool = false
@@ -22,13 +20,15 @@ setup :: proc() -> (success: bool) {
 	success = display.init()
 
 	if success {
-
+		mesh.mesh_to_render = mesh.create()
+		mesh.load_cube_mesh_data()
 	}
 
 	return success
 }
 
 cleanup :: proc() {
+	mesh.destroy(mesh.mesh_to_render)
 	display.deinit()
 }
 
@@ -66,27 +66,30 @@ update :: proc() {
 		sdl.Delay(time_to_wait)
 	}
 
-	cube_rotation.x += 0.1
-	cube_rotation.y += 0.1
-	cube_rotation.z += 0.1
+	// Initialize the array of triangles to render
+	triangles_to_render = make([dynamic]mesh.Triangle)
+
+	mesh.mesh_to_render.rotation.x += 0.1
+	mesh.mesh_to_render.rotation.y += 0.1
+	mesh.mesh_to_render.rotation.z += 0.1
 
 	w, h := display.get_window_middle()
 
 	// Loop all triangle faces in our mesh
-	for &face, i in mesh.faces {
+	for &face, i in mesh.mesh_to_render.faces {
 		face_vertices: [3]math.Vec3;
-		face_vertices[0] = mesh.vertices[face.a - 1]
-		face_vertices[1] = mesh.vertices[face.b - 1]
-		face_vertices[2] = mesh.vertices[face.c - 1]
+		face_vertices[0] = mesh.mesh_to_render.vertices[face.a - 1]
+		face_vertices[1] = mesh.mesh_to_render.vertices[face.b - 1]
+		face_vertices[2] = mesh.mesh_to_render.vertices[face.c - 1]
 
 		projected_triangle: mesh.Triangle
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
 			transformed_vertex := vertex
-			transformed_vertex = math.vec3_rotate_x(&transformed_vertex, cube_rotation.x)
-			transformed_vertex = math.vec3_rotate_y(&transformed_vertex, cube_rotation.y)
-			transformed_vertex = math.vec3_rotate_z(&transformed_vertex, cube_rotation.z)
+			transformed_vertex = math.vec3_rotate_x(&transformed_vertex, mesh.mesh_to_render.rotation.x)
+			transformed_vertex = math.vec3_rotate_y(&transformed_vertex, mesh.mesh_to_render.rotation.y)
+			transformed_vertex = math.vec3_rotate_z(&transformed_vertex, mesh.mesh_to_render.rotation.z)
 
 			// Translate the vertex from the camera
 			transformed_vertex.z -= camera_pos.z
@@ -102,7 +105,7 @@ update :: proc() {
 		}
 
 		// Save the projected triangle in the array of triangles to render
-		triangles_to_render[i] = projected_triangle
+		append(&triangles_to_render, projected_triangle)
 	}
 }
 
@@ -131,6 +134,7 @@ render :: proc() {
 							  0xFF00FF00)
 	}
 
+	delete(triangles_to_render)
 	display.finish_render()
 }
 
