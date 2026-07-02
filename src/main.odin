@@ -19,9 +19,9 @@ previous_frame_time: u32 = 0
 setup :: proc() -> (success: bool) {
 	success = display.init()
 
-	if success {
-		mesh.mesh_to_render = mesh.create()
-		mesh.load_cube_mesh_data()
+	if success { 
+		f22_mesh_obj := #load ("../assets/f22/f22.obj")
+		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
 	}
 
 	return success
