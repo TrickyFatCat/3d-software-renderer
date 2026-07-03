@@ -7,18 +7,18 @@ FPS :: 30
 FRAME_TARGET_TIME :: 1000 / FPS
 
 init :: proc() -> (success: bool) {
-    success = init_window()
+	success = init_window()
 
 	if success {
 		success = init_color_buffer()
 	}
 
 	return success
-}  
+}
 
 deinit :: proc() {
-    destroy_color_buffer()
-    destroy_window()
+	destroy_color_buffer()
+	destroy_window()
 }
 
 finish_render :: proc(clear_color: u32 = 0xFF000000) {
@@ -32,8 +32,8 @@ draw_grid :: proc(step: int, color: u32) {
 		for x: int; x < int(window_width); x += step {
 			if y == 0 || x == 0 {
 				continue
-			}		
-			
+			}
+
 			draw_pixel(x, y, color)
 		}
 	}
@@ -55,12 +55,12 @@ draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: u32) {
 
 	x_inc: f32 = f32(delta_x) / f32(longest_side_length)
 	y_inc: f32 = f32(delta_y) / f32(longest_side_length)
-	
+
 	current_x: f32 = f32(x0)
 	current_y: f32 = f32(y0)
 
-	for i in 0..=longest_side_length {
-		draw_pixel(int(math.round(current_x)), int(math.round(current_y)), color) 
+	for i in 0 ..= longest_side_length {
+		draw_pixel(int(math.round(current_x)), int(math.round(current_y)), color)
 		current_x += x_inc
 		current_y += y_inc
 	}
@@ -80,3 +80,4 @@ draw_pixel :: proc(x: int, y: int, color: u32) {
 	pixel_index := int(window_width) * y + x
 	set_pixel_color(pixel_index, color)
 }
+

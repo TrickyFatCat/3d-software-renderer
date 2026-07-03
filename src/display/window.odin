@@ -40,7 +40,7 @@ init_window :: proc() -> (success: bool) {
 	return success
 }
 
-get_window :: proc() -> (^sdl.Window) {
+get_window :: proc() -> ^sdl.Window {
 	return window
 }
 
@@ -81,7 +81,7 @@ create_window :: proc() -> (success: bool) {
 		sdl.WINDOWPOS_CENTERED,
 		i32(window_width),
 		i32(window_height),
-		sdl.WINDOW_BORDERLESS
+		sdl.WINDOW_BORDERLESS,
 	)
 
 	success = window != nil
@@ -123,3 +123,4 @@ destroy_window :: proc() {
 get_renderer :: proc() -> ^sdl.Renderer {
 	return renderer
 }
+

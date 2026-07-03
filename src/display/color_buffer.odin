@@ -22,9 +22,9 @@ init_color_buffer :: proc() -> (success: bool) {
 
 	err := create_buffer()
 	ok := create_texture()
- 
+
 	success = err == nil && ok
-	
+
 	when ODIN_DEBUG {
 		if success {
 			log.info("Color buffer successfully initialized.")
@@ -84,7 +84,7 @@ set_pixel_color :: proc(p_index: int, color: u32) {
 		}
 	}
 
-	if p_index < 0 || p_index >= buffer_len{
+	if p_index < 0 || p_index >= buffer_len {
 		return
 	}
 
@@ -125,3 +125,4 @@ create_texture :: proc() -> bool {
 	log.info("Color buffer texture successfully created.")
 	return true
 }
+
