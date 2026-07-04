@@ -48,7 +48,11 @@ parse_obj_file :: proc(file_data: ^string) -> (new_mesh: ^Mesh, success: bool) {
 	new_mesh = create()
 
 	for line in strings.split_lines_iterator(file_data) {
-		data_type := line[0:2]
+		if len(line) < 2 {
+			continue
+		}
+
+		data_type := line[:2]
 
 		switch data_type {
 		case "v ":
