@@ -116,3 +116,30 @@ vec_multiply :: proc {
 	vec3_multiply,
 }
 
+@(private)
+vec2_divide :: proc(v: ^Vec2, factor: f32) -> (new_vec: Vec2) {
+	if v == nil || factor == 0.0 {
+		return Vec2{}
+
+	}
+
+	new_vec = Vec2{v.x / factor, v.y / factor}
+	return new_vec
+}
+
+@(private)
+vec3_divide :: proc(v: ^Vec3, factor: f32) -> (new_vec: Vec3) {
+	if v == nil || factor == 0.0 {
+		return Vec3{}
+
+	}
+
+	new_vec = Vec3{v.x / factor, v.y / factor, v.z / factor}
+	return new_vec
+}
+
+vec_divide :: proc {
+	vec2_divide,
+	vec3_divide,
+}
+
