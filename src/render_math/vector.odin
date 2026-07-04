@@ -91,3 +91,28 @@ vec_add :: proc {
 	vec3_add,
 }
 
+@(private)
+vec2_multiply :: proc(v: ^Vec2, factor: f32) -> (new_vec: Vec2) {
+	if v == nil {
+		return Vec2{}
+	}
+
+	new_vec = Vec2{v.x * factor, v.y * factor}
+	return new_vec
+}
+
+@(private)
+vec3_multiply :: proc(v: ^Vec3, factor: f32) -> (new_vec: Vec3) {
+	if v == nil {
+		return Vec3{}
+	}
+
+	new_vec = Vec3{v.x * factor, v.y * factor, v.z * factor}
+	return new_vec
+}
+
+vec_multiply :: proc {
+	vec2_multiply,
+	vec3_multiply,
+}
+
