@@ -76,6 +76,25 @@ vec_add :: proc {
 }
 
 @(private)
+vec2_subtract :: proc(a: Vec2, b: Vec2) -> (new_vec: Vec2) {
+	new_vec = Vec2 {
+		x = a.x - b.x,
+		y = a.y - b.y,
+	}
+	return new_vec
+}
+
+@(private)
+vec3_subtract :: proc(a: Vec3, b: Vec3) -> (new_vec: Vec3) {
+	new_vec = Vec3 {
+		x = a.x - b.x,
+		y = a.y - b.y,
+		z = a.z - b.z,
+	}
+	return new_vec
+}
+
+@(private)
 vec2_multiply :: proc(v: Vec2, factor: f32) -> (new_vec: Vec2) {
 	new_vec = Vec2{v.x * factor, v.y * factor}
 	return new_vec
