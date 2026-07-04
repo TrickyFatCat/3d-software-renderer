@@ -94,6 +94,11 @@ vec3_subtract :: proc(a: Vec3, b: Vec3) -> (new_vec: Vec3) {
 	return new_vec
 }
 
+vec_subtract :: proc {
+	vec2_subtract,
+	vec3_subtract,
+}
+
 @(private)
 vec2_multiply :: proc(v: Vec2, factor: f32) -> (new_vec: Vec2) {
 	new_vec = Vec2{v.x * factor, v.y * factor}
