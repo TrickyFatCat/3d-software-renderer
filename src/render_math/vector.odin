@@ -161,3 +161,29 @@ vec_dot :: proc {
 	vec3_dot,
 }
 
+@(private)
+vec2_normalize :: proc(v: Vec2) -> (normal_vec: Vec2) {
+	length := vec_length(v)
+	normal_vec = Vec2 {
+		x = v.x / length,
+		y = v.y / length,
+	}
+	return normal_vec
+}
+
+@(private)
+vec3_normalize :: proc(v: Vec3) -> (normal_vec: Vec3) {
+	length := vec_length(v)
+	normal_vec = Vec3 {
+		x = v.x / length,
+		y = v.y / length,
+		z = v.z / length,
+	}
+	return normal_vec
+}
+
+vec_normalize :: proc {
+	vec2_normalize,
+	vec3_normalize,
+}
+

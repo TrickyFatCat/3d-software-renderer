@@ -117,10 +117,13 @@ update :: proc() {
 
 		// Get vector subtraction B - A and C - A
 		vec_ab := math.vec_subtract(vec_b, vec_a)
+		vec_ab = math.vec_normalize(vec_ab)
 		vec_ac := math.vec_subtract(vec_c, vec_a)
+		vec_ac = math.vec_normalize(vec_ac)
 
 		// Compute the face normal by using cross product
 		normal := math.vec3_cross(vec_ab, vec_ac)
+		normal = math.vec_normalize(normal)
 
 		// Find the vector a point in the triangle and the camera origin
 		camera_ray := math.vec_subtract(camera_pos, vec_a)
