@@ -13,7 +13,7 @@ triangles_to_render: [dynamic]mesh.Triangle = nil
 camera_pos: math.Vec3 = {
 	x = 0.0,
 	y = 0.0,
-	z = -5.0,
+	z = 0.0,
 }
 fov_factor: f32 : 640
 
@@ -25,7 +25,8 @@ setup :: proc() -> (success: bool) {
 
 	if success {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
-		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
+		cube_mesh_obj := #load("../assets/cube/cube.obj")
+		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
 	}
 
 	return success
@@ -57,7 +58,7 @@ process_input :: proc() {
 	}
 }
 
-project :: proc(point: ^math.Vec3) -> (projected_point: math.Vec2) {
+project :: proc(point: math.Vec3) -> (projected_point: math.Vec2) {
 	projected_point.x = (fov_factor * point.x) / point.z
 	projected_point.y = (fov_factor * point.y) / point.z
 	return projected_point
@@ -86,29 +87,59 @@ update :: proc() {
 		face_vertices[1] = mesh.mesh_to_render.vertices[face.b - 1]
 		face_vertices[2] = mesh.mesh_to_render.vertices[face.c - 1]
 
-		projected_triangle: mesh.Triangle
+		transformed_vertices: [3]math.Vec3
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
 			transformed_vertex := vertex
 			transformed_vertex = math.vec3_rotate_x(
-				&transformed_vertex,
+				transformed_vertex,
 				mesh.mesh_to_render.rotation.x,
 			)
 			transformed_vertex = math.vec3_rotate_y(
-				&transformed_vertex,
+				transformed_vertex,
 				mesh.mesh_to_render.rotation.y,
 			)
 			transformed_vertex = math.vec3_rotate_z(
-				&transformed_vertex,
+				transformed_vertex,
 				mesh.mesh_to_render.rotation.z,
 			)
 
 			// Translate the vertex from the camera
-			transformed_vertex.z -= camera_pos.z
+			transformed_vertex.z += 5
+			transformed_vertices[i] = transformed_vertex
+		}
 
+		// Perform backface culling
+		vec_a := transformed_vertices[0]
+		vec_b := transformed_vertices[1]
+		vec_c := transformed_vertices[2]
+
+		// Get vector subtraction B - A and C - A
+		vec_ab := math.vec_subtract(vec_b, vec_a)
+		vec_ac := math.vec_subtract(vec_c, vec_a)
+
+		// Compute the face normal by using cross product
+		normal := math.vec3_cross(vec_ab, vec_ac)
+
+		// Find the vector a point in the triangle and the camera origin
+		camera_ray := math.vec_subtract(camera_pos, vec_a)
+
+		// Calculate how aligned the camera ray with the face normal
+		// Using dot product
+		dot_product := math.vec_dot(camera_ray, normal)
+
+		// Bypass the triangles that are looking away from the camera
+		if dot_product < 0.0 {
+			continue
+		}
+
+		projected_triangle: mesh.Triangle
+
+		// Loop all three vertices to perform projection
+		for &vertex, i in transformed_vertices {
 			// Project current vertex
-			projected_point: math.Vec2 = project(&transformed_vertex)
+			projected_point: math.Vec2 = project(vertex)
 
 			// Scale and translate projected points to the middle of the screen
 			projected_point.x += f32(w)
