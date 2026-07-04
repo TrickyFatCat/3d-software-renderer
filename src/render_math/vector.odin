@@ -59,3 +59,35 @@ vec_length :: proc {
 	vec3_length,
 }
 
+@(private)
+vec2_add :: proc(a: ^Vec2, b: ^Vec2) -> (new_vec: Vec2) {
+	if a == nil || b == nil {
+		return Vec2{}
+	}
+
+	new_vec = Vec2 {
+		x = a.x + b.x,
+		y = a.y + b.y,
+	}
+	return new_vec
+}
+
+@(private)
+vec3_add :: proc(a: ^Vec3, b: ^Vec3) -> (new_vec: Vec3) {
+	if a == nil || b == nil {
+		return Vec3{}
+	}
+
+	new_vec = Vec3 {
+		x = a.x + b.x,
+		y = a.y + b.y,
+		z = a.z + b.z,
+	}
+	return new_vec
+}
+
+vec_add :: proc {
+	vec2_add,
+	vec3_add,
+}
+
