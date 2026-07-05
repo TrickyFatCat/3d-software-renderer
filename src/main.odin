@@ -16,6 +16,7 @@ camera_pos: rm.Vec3 = {
 	z = 0.0,
 }
 fov_factor: f32 : 640
+is_culling_enabled: bool = true
 
 is_running: bool = false
 previous_frame_time: u32 = 0
@@ -47,12 +48,32 @@ process_input :: proc() {
 		break
 
 	case sdl.EventType.KEYDOWN:
-		if event.key.keysym.sym == sdl.Keycode.ESCAPE {
+		#partial switch event.key.keysym.sym {
+		case sdl.Keycode.ESCAPE:
 			when ODIN_DEBUG {
 				log.info("ESC key was pressed. Start program termination.")
 			}
 
 			is_running = false
+			break
+		case sdl.Keycode.c:
+			if !is_culling_enabled {
+				when ODIN_DEBUG {
+					log.info("Back culling enabled.")
+				}
+
+				is_culling_enabled = true
+			}
+			break
+		case sdl.Keycode.d:
+			if is_culling_enabled {
+				when ODIN_DEBUG {
+					log.info("Back culling disabled.")
+				}
+
+				is_culling_enabled = false
+			}
+			break
 		}
 		break
 	}
@@ -110,31 +131,33 @@ update :: proc() {
 			transformed_vertices[i] = transformed_vertex
 		}
 
-		// Perform backface culling
-		vec_a := transformed_vertices[0]
-		vec_b := transformed_vertices[1]
-		vec_c := transformed_vertices[2]
+		if is_culling_enabled {
+			// Perform backface culling
+			vec_a := transformed_vertices[0]
+			vec_b := transformed_vertices[1]
+			vec_c := transformed_vertices[2]
 
-		// Get vector subtraction B - A and C - A
-		vec_ab := rm.vec_subtract(vec_b, vec_a)
-		vec_ab = rm.vec_normalize(vec_ab)
-		vec_ac := rm.vec_subtract(vec_c, vec_a)
-		vec_ac = rm.vec_normalize(vec_ac)
+			// Get vector subtraction B - A and C - A
+			vec_ab := rm.vec_subtract(vec_b, vec_a)
+			vec_ab = rm.vec_normalize(vec_ab)
+			vec_ac := rm.vec_subtract(vec_c, vec_a)
+			vec_ac = rm.vec_normalize(vec_ac)
 
-		// Compute the face normal by using cross product
-		normal := rm.vec3_cross(vec_ab, vec_ac)
-		normal = rm.vec_normalize(normal)
+			// Compute the face normal by using cross product
+			normal := rm.vec3_cross(vec_ab, vec_ac)
+			normal = rm.vec_normalize(normal)
 
-		// Find the vector a point in the triangle and the camera origin
-		camera_ray := rm.vec_subtract(camera_pos, vec_a)
+			// Find the vector a point in the triangle and the camera origin
+			camera_ray := rm.vec_subtract(camera_pos, vec_a)
 
-		// Calculate how aligned the camera ray with the face normal
-		// Using dot product
-		dot_product := rm.vec_dot(camera_ray, normal)
+			// Calculate how aligned the camera ray with the face normal
+			// Using dot product
+			dot_product := rm.vec_dot(camera_ray, normal)
 
-		// Bypass the triangles that are looking away from the camera
-		if dot_product < 0.0 {
-			continue
+			// Bypass the triangles that are looking away from the camera
+			if dot_product < 0.0 {
+				continue
+			}
 		}
 
 		projected_triangle: mesh.Triangle
@@ -175,15 +198,15 @@ render :: proc() {
 		}
 
 		// Draw filled triangle
-		mesh.draw_filled_triangle(
-			i32(triangle.points[0].x),
-			i32(triangle.points[0].y),
-			i32(triangle.points[1].x),
-			i32(triangle.points[1].y),
-			i32(triangle.points[2].x),
-			i32(triangle.points[2].y),
-			0xFFFFFFFF,
-		)
+		// mesh.draw_filled_triangle(
+		// 	i32(triangle.points[0].x),
+		// 	i32(triangle.points[0].y),
+		// 	i32(triangle.points[1].x),
+		// 	i32(triangle.points[1].y),
+		// 	i32(triangle.points[2].x),
+		// 	i32(triangle.points[2].y),
+		// 	0xFFFFFFFF,
+		// )
 
 		// Draw triangle edges
 		mesh.draw_triangle(
@@ -193,7 +216,7 @@ render :: proc() {
 			i32(triangle.points[1].y),
 			i32(triangle.points[2].x),
 			i32(triangle.points[2].y),
-			0xFF000000,
+			0xFFFF0000,
 		)
 
 	}
