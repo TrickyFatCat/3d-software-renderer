@@ -66,12 +66,6 @@ draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: u32) {
 	}
 }
 
-draw_triangle :: proc(x0: i32, y0: i32, x1: i32, y1: i32, x2: i32, y2: i32, color: u32) {
-	draw_line(x0, y0, x1, y1, color)
-	draw_line(x1, y1, x2, y2, color)
-	draw_line(x2, y2, x0, y0, color)
-}
-
 draw_pixel :: proc(x: int, y: int, color: u32) {
 	if (x < 0 && x > int(window_height) && y < 0 && y > int(window_height)) {
 		return
