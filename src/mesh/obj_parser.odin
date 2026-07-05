@@ -33,9 +33,10 @@ load_mesh_from_obj_file :: proc(file_path: string) -> (new_mesh: ^Mesh, success:
 	return new_mesh, success
 }
 
-load_mesh_from_obj_data :: proc(data: []u8) -> (loaded_mesh: ^Mesh, success: bool) {
+load_mesh_from_obj_data :: proc(data: []u8) -> (new_mesh: ^Mesh, success: bool) {
 	file_data := string(data)
-	return parse_obj_file(&file_data)
+	new_mesh, success = parse_obj_file(&file_data)
+	return new_mesh, success
 }
 
 @(private)
