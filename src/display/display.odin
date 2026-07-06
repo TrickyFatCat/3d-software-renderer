@@ -1,83 +1,10 @@
 package display
 
-import "core:log"
 import "core:math"
-import "core:reflect"
 import sdl "vendor:sdl2"
 
 FPS :: 30
 FRAME_TARGET_TIME :: 1000 / FPS
-
-Color :: u32
-
-WHITE :: Color(0xFFFFFFFF)
-GREY :: Color(0xFF555555)
-BLACK :: Color(0xFF000000)
-RED :: Color(0xFFFF0000)
-GREEN :: Color(0xFF00FF00)
-BLUE :: Color(0xFF0000FF)
-YELLOW :: Color(0xFFFFFF00)
-MAGENTA :: Color(0xFFFF00FF)
-AQUA :: Color(0xFF00FFFF)
-
-CullingMethod :: enum u8 {
-	CullNone,
-	CullBackface,
-}
-
-@(private)
-culling_method: CullingMethod = .CullBackface
-
-change_culling_method :: proc(new_method: CullingMethod) {
-	if new_method == culling_method {
-		return
-	}
-
-	culling_method = new_method
-
-	when ODIN_DEBUG {
-		method_name: string = reflect.enum_string(new_method)
-		log.infof("Culling method was changed to %s", method_name)
-	}
-}
-
-get_culling_method :: proc() -> CullingMethod {
-	return culling_method
-}
-
-is_culling_method :: proc(method: CullingMethod) -> bool {
-	return culling_method == method
-}
-
-DebugRenderOption :: enum u8 {
-	Vertex,
-	Edge,
-	Triangle,
-}
-
-DebugRenderOptions :: bit_set[DebugRenderOption]
-
-@(private)
-debug_render_options: DebugRenderOptions = {.Vertex, .Edge, .Triangle}
-
-toggle_render_option :: proc(option: DebugRenderOption) {
-	if option in debug_render_options {
-		debug_render_options -= {option}
-
-	} else {
-		debug_render_options += {option}
-	}
-
-	when ODIN_DEBUG {
-		result: string = "ENABLED" if option in debug_render_options else "DISABLED"
-		option_name: string = reflect.enum_string(option)
-		log.infof("%s render is %s.", option_name, result)
-	}
-}
-
-is_debug_option_enabled :: proc(option: DebugRenderOption) -> bool {
-	return option in debug_render_options
-}
 
 init :: proc() -> (success: bool) {
 	success = init_window()
