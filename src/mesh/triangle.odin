@@ -12,7 +12,7 @@ Triangle :: struct {
 }
 
 
-draw_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
+draw_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 	display.draw_line(x0, y0, x1, y1, color)
 	display.draw_line(x1, y1, x2, y2, color)
 	display.draw_line(x2, y2, x0, y0, color)
@@ -41,7 +41,7 @@ draw_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
 //                         (x2,y2)
 //
 ///////////////////////////////////////////////////////////////////////////////
-draw_filled_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
+draw_filled_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 	x0 := x0
 	x1 := x1
 	x2 := x2
@@ -94,7 +94,7 @@ draw_filled_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 @(private)
-fill_flat_bottom_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
+fill_flat_bottom_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 	// Find two slopes
 	inv_slope1: f32 = (f32)(x1 - x0) / (f32)(y1 - y0)
 	inv_slope2: f32 = (f32)(x2 - x0) / (f32)(y2 - y0)
@@ -125,7 +125,7 @@ fill_flat_bottom_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 @(private)
-fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: u32) {
+fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 	// Find two slopes
 	inv_slope1: f32 = (f32)(x2 - x0) / (f32)(y2 - y0)
 	inv_slope2: f32 = (f32)(x2 - x1) / (f32)(y2 - y1)

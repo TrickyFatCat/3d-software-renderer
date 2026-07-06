@@ -70,13 +70,13 @@ render_color_buffer_texture :: proc() {
 }
 
 @(private)
-clear_color_buffer :: proc(color: u32) {
+clear_color_buffer :: proc(color: Color) {
 	for &c in color_buffer {
-		c = color
+		c = u32(color)
 	}
 }
 
-set_pixel_color :: proc(p_index: int, color: u32) {
+set_pixel_color :: proc(p_index: int, color: Color) {
 	buffer_len := len(color_buffer)
 	if buffer_len == 0 {
 		when ODIN_DEBUG {
@@ -88,7 +88,7 @@ set_pixel_color :: proc(p_index: int, color: u32) {
 		return
 	}
 
-	color_buffer[p_index] = color
+	color_buffer[p_index] = u32(color)
 }
 
 get_color_buffer_texture :: proc() -> ^sdl.Texture {

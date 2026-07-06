@@ -8,6 +8,17 @@ import sdl "vendor:sdl2"
 FPS :: 30
 FRAME_TARGET_TIME :: 1000 / FPS
 
+Color :: enum u32 {
+	White   = 0xFFFFFFFF,
+	Black   = 0xFF000000,
+	Red     = 0xFFFF0000,
+	Green   = 0xFF00FF00,
+	Blue    = 0xFF0000FF,
+	Yellow  = 0xFFFFFF00,
+	Magenta = 0xFFFF00FF,
+	Aqua    = 0xFF00FFFF,
+}
+
 CullingMethod :: enum u8 {
 	CullNone,
 	CullBackface,
@@ -82,13 +93,13 @@ deinit :: proc() {
 	destroy_window()
 }
 
-finish_render :: proc(clear_color: u32 = 0xFF000000) {
+finish_render :: proc(clear_color: Color = .Black) {
 	render_color_buffer_texture()
 	clear_color_buffer(clear_color)
 	sdl.RenderPresent(renderer)
 }
 
-draw_grid :: proc(step: int, color: u32) {
+draw_grid :: proc(step: int, color: Color) {
 	for y: int; y < int(window_height); y += step {
 		for x: int; x < int(window_width); x += step {
 			if y == 0 || x == 0 {
@@ -100,7 +111,7 @@ draw_grid :: proc(step: int, color: u32) {
 	}
 }
 
-draw_rec :: proc(x: i32, y: i32, width: i32, height: i32, color: u32) {
+draw_rec :: proc(x: i32, y: i32, width: i32, height: i32, color: Color) {
 	for cur_y := y; cur_y < y + height; cur_y += 1 {
 		for cur_x := x; cur_x < x + width; cur_x += 1 {
 			draw_pixel(int(cur_x), int(cur_y), color)
@@ -108,7 +119,7 @@ draw_rec :: proc(x: i32, y: i32, width: i32, height: i32, color: u32) {
 	}
 }
 
-draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: u32) {
+draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: Color) {
 	delta_x := x1 - x0
 	delta_y := y1 - y0
 
@@ -127,7 +138,7 @@ draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: u32) {
 	}
 }
 
-draw_pixel :: proc(x: int, y: int, color: u32) {
+draw_pixel :: proc(x: int, y: int, color: Color) {
 	if (x < 0 && x > int(window_height) && y < 0 && y > int(window_height)) {
 		return
 	}
