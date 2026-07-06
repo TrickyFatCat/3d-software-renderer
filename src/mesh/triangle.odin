@@ -4,11 +4,12 @@ import "../display"
 import rm "../render_math"
 
 Face :: struct {
-	a, b, c: u32,
+	a, b, c, color: u32,
 }
 
 Triangle :: struct {
 	points: [3]rm.Vec2,
+	color:  u32,
 }
 
 

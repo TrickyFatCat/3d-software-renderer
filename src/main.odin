@@ -26,7 +26,7 @@ setup :: proc() -> (success: bool) {
 	if success {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
-		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
+		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
 	}
 
 	return success
@@ -161,20 +161,26 @@ update :: proc() {
 			}
 		}
 
-		projected_triangle: mesh.Triangle
+		projected_points: [3]rm.Vec2
 
 		// Loop all three vertices to perform projection
 		for &vertex, i in transformed_vertices {
 			// Project current vertex
-			projected_point: rm.Vec2 = project(vertex)
+			projected_points[i] = project(vertex)
 
 			// Scale and translate projected points to the middle of the screen
-			projected_point.x += f32(w)
-			projected_point.y += f32(h)
-
-			projected_triangle.points[i] = projected_point
+			projected_points[i].x += f32(w)
+			projected_points[i].y += f32(h)
 		}
 
+		projected_triangle: mesh.Triangle = {
+			points = {
+				{projected_points[0].x, projected_points[0].y},
+				{projected_points[1].x, projected_points[1].y},
+				{projected_points[2].x, projected_points[2].y},
+			},
+			color  = display.debug_colors[i % len(display.debug_colors)],
+		}
 		// Save the projected triangle in the array of triangles to render
 		append(&triangles_to_render, projected_triangle)
 	}
@@ -207,7 +213,7 @@ render :: proc() {
 				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
-				display.GREY,
+				triangle.color,
 			)
 		}
 
