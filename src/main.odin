@@ -3,7 +3,6 @@ package main
 import "core:fmt"
 import "core:log"
 import "core:mem"
-import "core:reflect"
 import "display"
 import "mesh"
 import rm "render_math"
@@ -17,32 +16,6 @@ camera_pos: rm.Vec3 = {
 	z = 0.0,
 }
 fov_factor: f32 : 640
-is_culling_enabled: bool = true
-
-DebugRenderOption :: enum u8 {
-	Vertex,
-	Edge,
-	Triangle,
-}
-
-DebugRenderOptions :: bit_set[DebugRenderOption]
-
-debug_render_options: DebugRenderOptions = {.Vertex, .Edge, .Triangle}
-
-toggle_render_option :: proc(option: DebugRenderOption) {
-	if option in debug_render_options {
-		debug_render_options -= {option}
-
-	} else {
-		debug_render_options += {option}
-	}
-
-	when ODIN_DEBUG {
-		result: string = "ENABLED" if option in debug_render_options else "DISABLED"
-		option_name: string = reflect.enum_string(option)
-		log.infof("%s render is %s.", option_name, result)
-	}
-}
 
 is_running: bool = false
 previous_frame_time: u32 = 0
@@ -84,35 +57,23 @@ process_input :: proc() {
 			break
 
 		case sdl.Keycode.c:
-			if !is_culling_enabled {
-				when ODIN_DEBUG {
-					log.info("Back culling ENABLED.")
-				}
-
-				is_culling_enabled = true
-			}
+			display.change_culling_method(.CullBackface)
 			break
 
 		case sdl.Keycode.d:
-			if is_culling_enabled {
-				when ODIN_DEBUG {
-					log.info("Back culling DISABLED.")
-				}
-
-				is_culling_enabled = false
-			}
+			display.change_culling_method(.CullNone)
 			break
 
 		case sdl.Keycode.NUM1:
-			toggle_render_option(.Vertex)
+			display.toggle_render_option(.Vertex)
 			break
 
 		case sdl.Keycode.NUM2:
-			toggle_render_option(.Edge)
+			display.toggle_render_option(.Edge)
 			break
 
 		case sdl.Keycode.NUM3:
-			toggle_render_option(.Triangle)
+			display.toggle_render_option(.Triangle)
 			break
 		}
 		break
@@ -171,7 +132,7 @@ update :: proc() {
 			transformed_vertices[i] = transformed_vertex
 		}
 
-		if is_culling_enabled {
+		if display.is_culling_method(.CullBackface) {
 			// Perform backface culling
 			vec_a := transformed_vertices[0]
 			vec_b := transformed_vertices[1]
@@ -228,7 +189,7 @@ render :: proc() {
 
 	// Loop all projected triangles and render them
 	for &triangle in triangles_to_render {
-		if .Vertex in debug_render_options {
+		if display.is_debug_option_enabled(.Vertex) {
 			// Draw vertices
 			for i in 0 ..< 3 {
 				x: i32 = i32(triangle.points[i].x)
@@ -237,7 +198,7 @@ render :: proc() {
 			}
 		}
 
-		if .Triangle in debug_render_options {
+		if display.is_debug_option_enabled(.Triangle) {
 			// Draw filled triangle
 			mesh.draw_filled_triangle(
 				i32(triangle.points[0].x),
@@ -250,7 +211,7 @@ render :: proc() {
 			)
 		}
 
-		if .Edge in debug_render_options {
+		if display.is_debug_option_enabled(.Edge) {
 			// Draw triangle edges
 			mesh.draw_triangle(
 				i32(triangle.points[0].x),
