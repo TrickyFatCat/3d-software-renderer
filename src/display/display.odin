@@ -8,16 +8,17 @@ import sdl "vendor:sdl2"
 FPS :: 30
 FRAME_TARGET_TIME :: 1000 / FPS
 
-Color :: enum u32 {
-	White   = 0xFFFFFFFF,
-	Black   = 0xFF000000,
-	Red     = 0xFFFF0000,
-	Green   = 0xFF00FF00,
-	Blue    = 0xFF0000FF,
-	Yellow  = 0xFFFFFF00,
-	Magenta = 0xFFFF00FF,
-	Aqua    = 0xFF00FFFF,
-}
+Color :: u32
+
+WHITE :: Color(0xFFFFFFFF)
+GREY :: Color(0xFF555555)
+BLACK :: Color(0xFF000000)
+RED :: Color(0xFFFF0000)
+GREEN :: Color(0xFF00FF00)
+BLUE :: Color(0xFF0000FF)
+YELLOW :: Color(0xFFFFFF00)
+MAGENTA :: Color(0xFFFF00FF)
+AQUA :: Color(0xFF00FFFF)
 
 CullingMethod :: enum u8 {
 	CullNone,
@@ -93,7 +94,7 @@ deinit :: proc() {
 	destroy_window()
 }
 
-finish_render :: proc(clear_color: Color = .Black) {
+finish_render :: proc(clear_color: Color = BLACK) {
 	render_color_buffer_texture()
 	clear_color_buffer(clear_color)
 	sdl.RenderPresent(renderer)

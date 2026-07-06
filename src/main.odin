@@ -194,7 +194,7 @@ render :: proc() {
 			for i in 0 ..< 3 {
 				x: i32 = i32(triangle.points[i].x)
 				y: i32 = i32(triangle.points[i].y)
-				display.draw_rec(x, y, 3, 3, .Red)
+				display.draw_rec(x, y, 3, 3, display.RED)
 			}
 		}
 
@@ -207,7 +207,7 @@ render :: proc() {
 				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
-				.White,
+				display.GREY,
 			)
 		}
 
@@ -220,7 +220,7 @@ render :: proc() {
 				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
-				.Blue,
+				display.WHITE,
 			)
 		}
 	}
