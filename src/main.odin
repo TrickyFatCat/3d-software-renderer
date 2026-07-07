@@ -2,7 +2,6 @@ package main
 
 import "core:fmt"
 import "core:log"
-import "core:math"
 import "core:mem"
 import "core:sort"
 import "display"
