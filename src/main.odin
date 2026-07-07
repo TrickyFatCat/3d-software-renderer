@@ -56,6 +56,10 @@ process_input :: proc() {
 			is_running = false
 			break
 
+		case sdl.Keycode.g:
+			display.toggle_debug_grid()
+			break
+
 		case sdl.Keycode.c:
 			display.change_culling_method(.CullBackface)
 			break
@@ -187,9 +191,9 @@ update :: proc() {
 }
 
 render :: proc() {
-
-	// display.draw_rec(200, 600, 200, 300, 0xFFFFFF00)
-	// display.draw_grid(10, 0xFFFF0000)
+	if display.is_debug_grid(.Dots) {
+		display.draw_grid(10, display.RED)
+	}
 
 	w, h := display.get_window_middle()
 
