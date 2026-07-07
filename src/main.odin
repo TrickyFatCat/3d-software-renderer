@@ -2,7 +2,9 @@ package main
 
 import "core:fmt"
 import "core:log"
+import "core:math"
 import "core:mem"
+import "core:sort"
 import "display"
 import "mesh"
 import rm "render_math"
@@ -114,6 +116,7 @@ update :: proc() {
 		face_vertices[2] = mesh.mesh_to_render.vertices[face.c - 1]
 
 		transformed_vertices: [3]rm.Vec3
+		z_sum: f32 = 0
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
@@ -134,6 +137,7 @@ update :: proc() {
 			// Translate the vertex from the camera
 			transformed_vertex.z += 5
 			transformed_vertices[i] = transformed_vertex
+			z_sum += transformed_vertex.z
 		}
 
 		if display.is_culling_method(.CullBackface) {
@@ -177,17 +181,28 @@ update :: proc() {
 			projected_points[i].y += f32(h)
 		}
 
+		// Calculate the average depth for each face based on the vertices after transformation
+		avg_depth: f32 = z_sum / 3.0
+
 		projected_triangle: mesh.Triangle = {
-			points = {
+			points    = {
 				{projected_points[0].x, projected_points[0].y},
 				{projected_points[1].x, projected_points[1].y},
 				{projected_points[2].x, projected_points[2].y},
 			},
-			color  = display.debug_colors[i % len(display.debug_colors)],
+			color     = display.debug_colors[i % len(display.debug_colors)],
+			avg_depth = avg_depth,
 		}
 		// Save the projected triangle in the array of triangles to render
 		append(&triangles_to_render, projected_triangle)
 	}
+
+	// Sort triangles by their average depth
+	compare_triangles :: proc(a, b: mesh.Triangle) -> int {
+		return sort.compare_f32s(b.avg_depth, a.avg_depth)
+	}
+
+	sort.quick_sort_proc(triangles_to_render[:], compare_triangles)
 }
 
 render :: proc() {
