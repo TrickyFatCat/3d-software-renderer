@@ -69,11 +69,7 @@ parse_obj_file :: proc(file_data: ^string) -> (new_mesh: ^Mesh, success: bool) {
 				}
 			}
 
-			vertex: math.Vec3 = {
-				x = float_arr[0],
-				y = float_arr[1],
-				z = float_arr[2],
-			}
+			vertex: math.Vec3 = {float_arr[0], float_arr[1], float_arr[2]}
 			append(&new_mesh.vertices, vertex)
 			break
 

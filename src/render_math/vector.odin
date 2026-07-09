@@ -2,13 +2,10 @@ package render_math
 
 import "core:math"
 
-Vec2 :: struct {
-	x, y: f32,
-}
+Vec2 :: distinct [2]f32
 
-Vec3 :: struct {
-	x, y, z: f32,
-}
+Vec3 :: distinct [3]f32
+
 
 vec3_rotate_x :: proc(v: Vec3, angle: f32) -> (rotated_vector: Vec3) {
 	angle := math.to_radians(angle)
@@ -53,20 +50,16 @@ vec_length :: proc {
 
 @(private)
 vec2_add :: proc(a: Vec2, b: Vec2) -> (new_vec: Vec2) {
-	new_vec = Vec2 {
-		x = a.x + b.x,
-		y = a.y + b.y,
-	}
+	new_vec.x = a.x + b.x
+	new_vec.y = a.y + b.y
 	return new_vec
 }
 
 @(private)
 vec3_add :: proc(a: Vec3, b: Vec3) -> (new_vec: Vec3) {
-	new_vec = Vec3 {
-		x = a.x + b.x,
-		y = a.y + b.y,
-		z = a.z + b.z,
-	}
+	new_vec.x = a.x + b.x
+	new_vec.y = a.y + b.y
+	new_vec.z = a.z + b.z
 	return new_vec
 }
 
@@ -77,20 +70,16 @@ vec_add :: proc {
 
 @(private)
 vec2_subtract :: proc(a: Vec2, b: Vec2) -> (new_vec: Vec2) {
-	new_vec = Vec2 {
-		x = a.x - b.x,
-		y = a.y - b.y,
-	}
+	new_vec.x = a.x - b.x
+	new_vec.y = a.y - b.y
 	return new_vec
 }
 
 @(private)
 vec3_subtract :: proc(a: Vec3, b: Vec3) -> (new_vec: Vec3) {
-	new_vec = Vec3 {
-		x = a.x - b.x,
-		y = a.y - b.y,
-		z = a.z - b.z,
-	}
+	new_vec.x = a.x - b.x
+	new_vec.y = a.y - b.y
+	new_vec.z = a.z - b.z
 	return new_vec
 }
 
@@ -135,11 +124,9 @@ vec_divide :: proc {
 
 
 vec3_cross :: proc(a: Vec3, b: Vec3) -> (cross_product: Vec3) {
-	cross_product = Vec3 {
-		x = a.y * b.z - a.z * b.y,
-		y = a.z * b.x - a.x * b.z,
-		z = a.x * b.y - a.y * b.x,
-	}
+	cross_product.x = a.y * b.z - a.z * b.y
+	cross_product.y = a.z * b.x - a.x * b.z
+	cross_product.z = a.x * b.y - a.y * b.x
 	return cross_product
 }
 
@@ -164,21 +151,17 @@ vec_dot :: proc {
 @(private)
 vec2_normalize :: proc(v: Vec2) -> (normal_vec: Vec2) {
 	length := vec_length(v)
-	normal_vec = Vec2 {
-		x = v.x / length,
-		y = v.y / length,
-	}
+	normal_vec.x = v.x / length
+	normal_vec.y = v.y / length
 	return normal_vec
 }
 
 @(private)
 vec3_normalize :: proc(v: Vec3) -> (normal_vec: Vec3) {
 	length := vec_length(v)
-	normal_vec = Vec3 {
-		x = v.x / length,
-		y = v.y / length,
-		z = v.z / length,
-	}
+	normal_vec.x = v.x / length
+	normal_vec.y = v.y / length
+	normal_vec.z = v.z / length
 	return normal_vec
 }
 

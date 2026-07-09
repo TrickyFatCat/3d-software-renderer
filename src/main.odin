@@ -11,11 +11,7 @@ import sdl "vendor:sdl2"
 
 triangles_to_render: [dynamic]mesh.Triangle = nil
 
-camera_pos: rm.Vec3 = {
-	x = 0.0,
-	y = 0.0,
-	z = 0.0,
-}
+camera_pos: rm.Vec3 = {0.0, 0.0, 0.0}
 fov_factor: f32 : 640
 
 is_running: bool = false
