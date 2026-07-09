@@ -1,19 +1,22 @@
 package mesh
 
-import math "../render_math"
+import rmath "../render_math"
 
 mesh_to_render: ^Mesh = nil
 
 Mesh :: struct {
-	vertices: [dynamic]math.Vec3,
-	faces:    [dynamic]Face,
-	rotation: math.Vec3,
+	vertices:    [dynamic]rmath.Vec3,
+	faces:       [dynamic]Face,
+	rotation:    rmath.Vec3,
+	scale:       rmath.Vec3,
+	translation: rmath.Vec3,
 }
 
 create :: proc() -> (new_mesh: ^Mesh) {
 	new_mesh = new(Mesh)
 	new_mesh.faces = make([dynamic]Face)
-	new_mesh.vertices = make([dynamic]math.Vec3)
+	new_mesh.vertices = make([dynamic]rmath.Vec3)
+	new_mesh.scale = rmath.vec3_one
 	return new_mesh
 }
 
@@ -29,7 +32,7 @@ destroy :: proc(m: ^Mesh) -> bool {
 }
 
 N_CUBE_VERTICES :: 8
-cube_vertices: [N_CUBE_VERTICES]math.Vec3 = {
+cube_vertices: [N_CUBE_VERTICES]rmath.Vec3 = {
 	{-1, -1, -1}, // 1
 	{-1, 1, -1}, // 2
 	{1, 1, -1}, // 3

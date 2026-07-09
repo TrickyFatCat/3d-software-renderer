@@ -101,6 +101,9 @@ update :: proc() {
 	mesh.mesh_to_render.rotation.y += 0.1
 	mesh.mesh_to_render.rotation.z += 0.1
 
+	// Create a scale matrix that will be used to multiply the mesh vertices
+	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
+
 	w, h := display.get_window_middle()
 
 	// Loop all triangle faces in our mesh
@@ -110,24 +113,15 @@ update :: proc() {
 		face_vertices[1] = mesh.mesh_to_render.vertices[face.b - 1]
 		face_vertices[2] = mesh.mesh_to_render.vertices[face.c - 1]
 
-		transformed_vertices: [3]rm.Vec3
+		transformed_vertices: [3]rm.Vec4
 		z_sum: f32 = 0
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
-			transformed_vertex := vertex
-			transformed_vertex = rm.vec3_rotate_x(
-				transformed_vertex,
-				mesh.mesh_to_render.rotation.x,
-			)
-			transformed_vertex = rm.vec3_rotate_y(
-				transformed_vertex,
-				mesh.mesh_to_render.rotation.y,
-			)
-			transformed_vertex = rm.vec3_rotate_z(
-				transformed_vertex,
-				mesh.mesh_to_render.rotation.z,
-			)
+			transformed_vertex := rm.vec4(vertex)
+
+			// Use matrix to scale our original vertex
+			transformed_vertex = rm.mat4_multiply(scale_matrix, transformed_vertex)
 
 			// Translate the vertex from the camera
 			transformed_vertex.z += 5
@@ -137,9 +131,9 @@ update :: proc() {
 
 		if display.is_culling_method(.CullBackface) {
 			// Perform backface culling
-			vec_a := transformed_vertices[0]
-			vec_b := transformed_vertices[1]
-			vec_c := transformed_vertices[2]
+			vec_a := rm.vec3(transformed_vertices[0])
+			vec_b := rm.vec3(transformed_vertices[1])
+			vec_c := rm.vec3(transformed_vertices[2])
 
 			// Get vector subtraction B - A and C - A
 			vec_ab := rm.vec_subtract(vec_b, vec_a)
@@ -169,7 +163,7 @@ update :: proc() {
 		// Loop all three vertices to perform projection
 		for &vertex, i in transformed_vertices {
 			// Project current vertex
-			projected_points[i] = project(vertex)
+			projected_points[i] = project(rm.vec3(vertex))
 
 			// Scale and translate projected points to the middle of the screen
 			projected_points[i].x += f32(w)

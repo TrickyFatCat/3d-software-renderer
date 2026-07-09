@@ -6,6 +6,10 @@ Vec2 :: distinct [2]f32
 
 Vec3 :: distinct [3]f32
 
+Vec4 :: distinct [4]f32
+
+vec3_one :: Vec3{1.0, 1.0, 1.0}
+
 
 vec3_rotate_x :: proc(v: Vec3, angle: f32) -> (rotated_vector: Vec3) {
 	angle := math.to_radians(angle)
@@ -168,5 +172,20 @@ vec3_normalize :: proc(v: Vec3) -> (normal_vec: Vec3) {
 vec_normalize :: proc {
 	vec2_normalize,
 	vec3_normalize,
+}
+
+vec4 :: proc(v: Vec3) -> (new_vec: Vec4) {
+	new_vec.x = v.x
+	new_vec.y = v.y
+	new_vec.z = v.z
+	new_vec.w = 1.0
+	return new_vec
+}
+
+vec3 :: proc(v: Vec4) -> (new_vec: Vec3) {
+	new_vec.x = v.x
+	new_vec.y = v.y
+	new_vec.z = v.z
+	return new_vec
 }
 
