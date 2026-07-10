@@ -51,14 +51,47 @@ make_scale_mat4 :: proc {
 
 @(private)
 mat4_mul_vec4 :: proc(m: Mat4, v: Vec4) -> (new_vec: Vec4) {
-	new_vec.x = (m[0][0] * v.x) + (m[0][1] + v.y) + (m[0][2] * v.z) + (m[0][3] * v.w)
-	new_vec.y = (m[1][0] * v.x) + (m[1][1] + v.y) + (m[1][2] * v.z) + (m[1][3] * v.w)
-	new_vec.z = (m[2][0] * v.x) + (m[2][1] + v.y) + (m[2][2] * v.z) + (m[2][3] * v.w)
+	new_vec.x = (m[0][0] * v.x) + (m[0][1] * v.y) + (m[0][2] * v.z) + (m[0][3] * v.w)
+	new_vec.y = (m[1][0] * v.x) + (m[1][1] * v.y) + (m[1][2] * v.z) + (m[1][3] * v.w)
+	new_vec.z = (m[2][0] * v.x) + (m[2][1] * v.y) + (m[2][2] * v.z) + (m[2][3] * v.w)
+	new_vec.w = (m[3][0] * v.x) + (m[3][1] * v.y) + (m[3][2] * v.z) + (m[3][3] * v.w)
 	return new_vec
 }
 
 
 mat4_multiply :: proc {
 	mat4_mul_vec4,
+}
+
+
+@(private)
+make_translation_mat4_xyz :: proc(tx, ty, tz: f32) -> (translation_mat4: Mat4) {
+	// | 1 0 0 tx |
+	// | 0 1 0 ty |
+	// | 0 0 1 tz |
+	// | 0 0 0 1  |
+	translation_mat4 = get_identity_mat4()
+	translation_mat4[0][3] = tx
+	translation_mat4[1][3] = ty
+	translation_mat4[2][3] = tz
+	return translation_mat4
+}
+
+@(private)
+make_translation_mat4_vec3 :: proc(v: Vec3) -> (translation_mat4: Mat4) {
+	// | 1 0 0 tx |
+	// | 0 1 0 ty |
+	// | 0 0 1 tz |
+	// | 0 0 0 1  |
+	translation_mat4 = get_identity_mat4()
+	translation_mat4[0][3] = v.x
+	translation_mat4[1][3] = v.y
+	translation_mat4[2][3] = v.z
+	return translation_mat4
+}
+
+make_translation_mat4 :: proc {
+	make_translation_mat4_xyz,
+	make_translation_mat4_vec3,
 }
 
