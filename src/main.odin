@@ -24,6 +24,7 @@ setup :: proc() -> (success: bool) {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
+		mesh.mesh_to_render.translation.z = 5
 	}
 
 	return success
@@ -97,10 +98,7 @@ update :: proc() {
 	// Initialize the array of triangles to render
 	triangles_to_render = make([dynamic]mesh.Triangle)
 
-	// mesh.mesh_to_render.rotation.x += 0.1
-	// mesh.mesh_to_render.rotation.y += 0.1
-	// mesh.mesh_to_render.rotation.z += 0.1
-	mesh.mesh_to_render.scale += 0.001
+	// mesh.mesh_to_render.scale += 0.001
 	mesh.mesh_to_render.translation += 0.001
 
 	// Create a scale matrix that will be used to multiply the mesh vertices
@@ -129,8 +127,6 @@ update :: proc() {
 			transformed_vertex = rm.mat4_multiply(scale_matrix, transformed_vertex)
 			transformed_vertex = rm.mat4_multiply(translation_matrix, transformed_vertex)
 
-			// Translate the vertex from the camera
-			transformed_vertex.z += 5
 			transformed_vertices[i] = transformed_vertex
 			z_sum += transformed_vertex.z
 		}
