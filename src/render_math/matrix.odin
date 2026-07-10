@@ -1,5 +1,7 @@
 package render_math
 
+import "core:math"
+
 // Odin has its own matrix type, but this one created for learning experience
 Mat4 :: distinct [4][4]f32
 
@@ -93,5 +95,86 @@ make_translation_mat4_vec3 :: proc(v: Vec3) -> (translation_mat4: Mat4) {
 make_translation_mat4 :: proc {
 	make_translation_mat4_xyz,
 	make_translation_mat4_vec3,
+}
+
+@(private)
+make_rotation_x_mat4_angle :: proc(angle: f32) -> (rot_x_mat4: Mat4) {
+	sin := math.sin(angle)
+	cos := math.cos(angle)
+	// | 1    0    0 0 |
+	// | 0  cos  sin 0 |
+	// | 0 -sin  cos 0 |
+	// | 0    0    0 1 |
+	rot_x_mat4 = get_identity_mat4()
+	rot_x_mat4[1][1] = cos
+	rot_x_mat4[1][2] = sin
+	rot_x_mat4[2][1] = -sin
+	rot_x_mat4[2][2] = cos
+	return rot_x_mat4
+}
+
+@(private)
+make_rotation_x_mat4_vec3 :: proc(v: Vec3) -> (rot_x_mat4: Mat4) {
+	rot_x_mat4 = make_rotation_x_mat4_angle(v.x)
+	return rot_x_mat4
+}
+
+make_rotation_x_mat4 :: proc {
+	make_rotation_x_mat4_angle,
+	make_rotation_x_mat4_vec3,
+}
+
+@(private)
+make_rotation_y_mat4_angle :: proc(angle: f32) -> (rot_y_mat4: Mat4) {
+	sin := math.sin(angle)
+	cos := math.cos(angle)
+	// | cos 0 -sin 0 |
+	// |   0 1    0 0 |
+	// | sin 0  cos 0 |
+	// |   0 0    0 1 |
+	rot_y_mat4 = get_identity_mat4()
+	rot_y_mat4[0][0] = cos
+	rot_y_mat4[0][2] = -sin
+	rot_y_mat4[2][0] = sin
+	rot_y_mat4[2][2] = cos
+	return rot_y_mat4
+}
+
+@(private)
+make_rotation_y_mat4_vec3 :: proc(v: Vec3) -> (rot_y_mat4: Mat4) {
+	rot_y_mat4 = make_rotation_y_mat4_angle(v.y)
+	return rot_y_mat4
+}
+
+make_rotation_y_mat4 :: proc {
+	make_rotation_y_mat4_angle,
+	make_rotation_y_mat4_vec3,
+}
+
+@(private)
+make_rotation_z_mat4_angle :: proc(angle: f32) -> (rot_z_mat4: Mat4) {
+	sin := math.sin(angle)
+	cos := math.cos(angle)
+	// |  cos sin 0 0 |
+	// | -sin cos 0 0 |
+	// |    0   0 1 0 |
+	// |    0   0 0 1 |
+	rot_z_mat4 = get_identity_mat4()
+	rot_z_mat4[0][0] = cos
+	rot_z_mat4[0][1] = sin
+	rot_z_mat4[1][0] = -sin
+	rot_z_mat4[1][1] = cos
+	return rot_z_mat4
+}
+
+@(private)
+make_rotation_z_mat4_vec3 :: proc(v: Vec3) -> (rot_z_mat4: Mat4) {
+	rot_z_mat4 = make_rotation_z_mat4_angle(v.z)
+	return rot_z_mat4
+}
+
+make_rotation_z_mat4 :: proc {
+	make_rotation_z_mat4_angle,
+	make_rotation_z_mat4_vec3,
 }
 

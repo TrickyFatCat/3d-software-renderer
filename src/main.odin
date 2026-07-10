@@ -99,11 +99,15 @@ update :: proc() {
 	triangles_to_render = make([dynamic]mesh.Triangle)
 
 	// mesh.mesh_to_render.scale += 0.001
-	mesh.mesh_to_render.translation += 0.001
+	// mesh.mesh_to_render.translation += 0.001
+	mesh.mesh_to_render.rotation.x += 0.01
 
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
 	translation_matrix: rm.Mat4 = rm.make_translation_mat4(mesh.mesh_to_render.translation)
+	rot_x_matrix: rm.Mat4 = rm.make_rotation_x_mat4(mesh.mesh_to_render.rotation)
+	rot_y_matrix: rm.Mat4 = rm.make_rotation_y_mat4(mesh.mesh_to_render.rotation)
+	rot_z_matrix: rm.Mat4 = rm.make_rotation_z_mat4(mesh.mesh_to_render.rotation)
 
 
 	w, h := display.get_window_middle()
@@ -125,6 +129,9 @@ update :: proc() {
 
 			// Use matrix to scale our original vertex
 			transformed_vertex = rm.mat4_multiply(scale_matrix, transformed_vertex)
+			transformed_vertex = rm.mat4_multiply(rot_x_matrix, transformed_vertex)
+			transformed_vertex = rm.mat4_multiply(rot_y_matrix, transformed_vertex)
+			transformed_vertex = rm.mat4_multiply(rot_z_matrix, transformed_vertex)
 			transformed_vertex = rm.mat4_multiply(translation_matrix, transformed_vertex)
 
 			transformed_vertices[i] = transformed_vertex
