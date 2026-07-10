@@ -129,6 +129,12 @@ update :: proc() {
 
 			// Create a world Matrix combining scale, rotation, and translation marices
 			world_matrix := rm.get_identity_mat4()
+
+			// WARNING: Order matters
+			// 1. Scale
+			// 2. Rotation
+			// 3. Translation
+			// [T] * [R] * [S] * v
 			world_matrix = rm.mat4_multiply(scale_matrix, world_matrix)
 			world_matrix = rm.mat4_multiply(rot_matrix_x, world_matrix)
 			world_matrix = rm.mat4_multiply(rot_matrix_y, world_matrix)
