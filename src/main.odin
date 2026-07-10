@@ -8,6 +8,7 @@ import "display"
 import "mesh"
 import rm "render_math"
 import sdl "vendor:sdl2"
+import "vendor:windows/XAudio2"
 
 triangles_to_render: [dynamic]mesh.Triangle = nil
 
@@ -105,9 +106,9 @@ update :: proc() {
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
 	translation_matrix: rm.Mat4 = rm.make_translation_mat4(mesh.mesh_to_render.translation)
-	rot_x_matrix: rm.Mat4 = rm.make_rotation_x_mat4(mesh.mesh_to_render.rotation)
-	rot_y_matrix: rm.Mat4 = rm.make_rotation_y_mat4(mesh.mesh_to_render.rotation)
-	rot_z_matrix: rm.Mat4 = rm.make_rotation_z_mat4(mesh.mesh_to_render.rotation)
+	rot_matrix_x: rm.Mat4 = rm.make_rotation_x_mat4(mesh.mesh_to_render.rotation)
+	rot_matrix_y: rm.Mat4 = rm.make_rotation_y_mat4(mesh.mesh_to_render.rotation)
+	rot_matrix_z: rm.Mat4 = rm.make_rotation_z_mat4(mesh.mesh_to_render.rotation)
 
 
 	w, h := display.get_window_middle()
@@ -126,13 +127,17 @@ update :: proc() {
 		for &vertex, i in face_vertices {
 			transformed_vertex := rm.vec4(vertex)
 
+			// Create a world Matrix combining scale, rotation, and translation marices
+			world_matrix := rm.get_identity_mat4()
+			world_matrix = rm.mat4_multiply(scale_matrix, world_matrix)
+			world_matrix = rm.mat4_multiply(rot_matrix_x, world_matrix)
+			world_matrix = rm.mat4_multiply(rot_matrix_y, world_matrix)
+			world_matrix = rm.mat4_multiply(rot_matrix_z, world_matrix)
+			world_matrix = rm.mat4_multiply(translation_matrix, world_matrix)
 
-			// Use matrix to scale our original vertex
-			transformed_vertex = rm.mat4_multiply(scale_matrix, transformed_vertex)
-			transformed_vertex = rm.mat4_multiply(rot_x_matrix, transformed_vertex)
-			transformed_vertex = rm.mat4_multiply(rot_y_matrix, transformed_vertex)
-			transformed_vertex = rm.mat4_multiply(rot_z_matrix, transformed_vertex)
-			transformed_vertex = rm.mat4_multiply(translation_matrix, transformed_vertex)
+
+			// Multiply the world matrix by the original vertex
+			transformed_vertex = rm.mat4_multiply(world_matrix, transformed_vertex)
 
 			transformed_vertices[i] = transformed_vertex
 			z_sum += transformed_vertex.z

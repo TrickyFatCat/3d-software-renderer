@@ -61,8 +61,24 @@ mat4_mul_vec4 :: proc(m: Mat4, v: Vec4) -> (new_vec: Vec4) {
 }
 
 
+@(private)
+mat4_mul_mat4 :: proc(a, b: Mat4) -> (new_matrix: Mat4) {
+	for i in 0 ..< 4 {
+		for j in 0 ..< 4 {
+			new_matrix[i][j] =
+				(a[i][0] * b[0][j]) +
+				(a[i][1] * b[1][j]) +
+				(a[i][2] * b[2][j]) +
+				(a[i][3] * b[3][j])
+		}
+	}
+	return new_matrix
+}
+
+
 mat4_multiply :: proc {
 	mat4_mul_vec4,
+	mat4_mul_mat4,
 }
 
 
