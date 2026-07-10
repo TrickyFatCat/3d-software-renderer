@@ -97,12 +97,16 @@ update :: proc() {
 	// Initialize the array of triangles to render
 	triangles_to_render = make([dynamic]mesh.Triangle)
 
-	mesh.mesh_to_render.rotation.x += 0.1
-	mesh.mesh_to_render.rotation.y += 0.1
-	mesh.mesh_to_render.rotation.z += 0.1
+	// mesh.mesh_to_render.rotation.x += 0.1
+	// mesh.mesh_to_render.rotation.y += 0.1
+	// mesh.mesh_to_render.rotation.z += 0.1
+	mesh.mesh_to_render.scale += 0.001
+	mesh.mesh_to_render.translation += 0.001
 
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
+	translation_matrix: rm.Mat4 = rm.make_translation_mat4(mesh.mesh_to_render.translation)
+
 
 	w, h := display.get_window_middle()
 
@@ -120,8 +124,10 @@ update :: proc() {
 		for &vertex, i in face_vertices {
 			transformed_vertex := rm.vec4(vertex)
 
+
 			// Use matrix to scale our original vertex
 			transformed_vertex = rm.mat4_multiply(scale_matrix, transformed_vertex)
+			transformed_vertex = rm.mat4_multiply(translation_matrix, transformed_vertex)
 
 			// Translate the vertex from the camera
 			transformed_vertex.z += 5
