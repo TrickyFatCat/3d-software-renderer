@@ -8,7 +8,6 @@ import "display"
 import "mesh"
 import rm "render_math"
 import sdl "vendor:sdl2"
-import "vendor:windows/XAudio2"
 
 triangles_to_render: [dynamic]mesh.Triangle = nil
 
