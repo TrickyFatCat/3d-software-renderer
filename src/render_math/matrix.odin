@@ -19,6 +19,20 @@ get_identity_mat4 :: proc() -> (identity_mat4: Mat4) {
 	return identity_mat4
 }
 
+get_zero_mat4 :: proc() -> (zero_mat4: Mat4) {
+	// | 0 0 0 0 |
+	// | 0 0 0 0 |
+	// | 0 0 0 0 |
+	// | 0 0 0 0 |
+	zero_mat4 = {
+		{0, 0, 0, 0}, //
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+		{0, 0, 0, 0},
+	}
+	return zero_mat4
+}
+
 @(private)
 make_scale_mat4_xyz :: proc(sx, sy, sz: f32) -> (scale_mat4: Mat4) {
 	// | sx  0  0 0 |
