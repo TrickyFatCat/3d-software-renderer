@@ -2,6 +2,7 @@ package main
 
 import "core:fmt"
 import "core:log"
+import "core:math"
 import "core:mem"
 import "core:sort"
 import "display"
@@ -12,7 +13,7 @@ import sdl "vendor:sdl2"
 triangles_to_render: [dynamic]mesh.Triangle = nil
 
 camera_pos: rm.Vec3 = {0.0, 0.0, 0.0}
-fov_factor: f32 : 640
+proj_matrix: rm.Mat4
 
 is_running: bool = false
 previous_frame_time: u32 = 0
@@ -25,6 +26,14 @@ setup :: proc() -> (success: bool) {
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
 		mesh.mesh_to_render.translation.z = 5
+
+		// Initialize perspective projection matrix
+		fov := math.to_radians_f32(60.0)
+		aspect := display.get_window_aspect_ratio()
+		znear: f32 = 0.1
+		zfar: f32 = 100.0
+		proj_matrix = rm.create_projection_matrix(fov, aspect, znear, zfar)
+
 	}
 
 	return success
@@ -82,11 +91,6 @@ process_input :: proc() {
 	}
 }
 
-project :: proc(point: rm.Vec3) -> (projected_point: rm.Vec2) {
-	projected_point.x = (fov_factor * point.x) / point.z
-	projected_point.y = (fov_factor * point.y) / point.z
-	return projected_point
-}
 
 update :: proc() {
 	time_to_wait: u32 = display.FRAME_TARGET_TIME - (sdl.GetTicks() - previous_frame_time)
@@ -177,16 +181,21 @@ update :: proc() {
 			}
 		}
 
-		projected_points: [3]rm.Vec2
+		projected_points: [3]rm.Vec4
 
 		// Loop all three vertices to perform projection
 		for &vertex, i in transformed_vertices {
 			// Project current vertex
-			projected_points[i] = project(rm.vec3(vertex))
+			projected_points[i] = rm.project_vec4(proj_matrix, vertex)
 
-			// Scale and translate projected points to the middle of the screen
+			// Scale into the view
+			projected_points[i].x *= f32(w)
+			projected_points[i].y *= f32(h)
+
+			// Translate projected points to the middle of the screen
 			projected_points[i].x += f32(w)
 			projected_points[i].y += f32(h)
+
 		}
 
 		// Calculate the average depth for each face based on the vertices after transformation
