@@ -52,6 +52,14 @@ get_window_middle :: proc() -> (u32, u32) {
 	return window_width / 2, window_height / 2
 }
 
+get_window_aspect_ratio :: proc() -> f32 {
+	if window_width <= 0 {
+		return -1.0
+	}
+
+	return f32(window_height) / f32(window_width)
+}
+
 @(private)
 init_sdl :: proc() -> (success: bool) {
 	success = sdl.Init(sdl.INIT_EVERYTHING) == 0
