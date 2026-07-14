@@ -9,6 +9,7 @@ Face :: struct {
 
 Triangle :: struct {
 	points:    [3]rm.Vec2,
+	normal:    rm.Vec3,
 	color:     u32,
 	avg_depth: f32,
 }

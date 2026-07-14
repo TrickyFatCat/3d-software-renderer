@@ -10,6 +10,10 @@ Vec4 :: distinct [4]f32
 
 vec3_one :: Vec3{1.0, 1.0, 1.0}
 
+vec3_fwd :: Vec3{0.0, 0.0, -1.0}
+
+vec4_fwd :: Vec4{0.0, 0.0, -1.0, 0.0}
+
 
 vec3_rotate_x :: proc(v: Vec3, angle: f32) -> (rotated_vector: Vec3) {
 	angle := math.to_radians(angle)

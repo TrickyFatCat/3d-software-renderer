@@ -39,12 +39,13 @@ DebugRenderOption :: enum u8 {
 	Vertex,
 	Edge,
 	Triangle,
+	Shading,
 }
 
 DebugRenderOptions :: bit_set[DebugRenderOption]
 
 @(private)
-debug_render_options: DebugRenderOptions = {.Vertex, .Edge, .Triangle}
+debug_render_options: DebugRenderOptions = {.Vertex, .Edge, .Triangle, .Shading}
 
 toggle_render_option :: proc(option: DebugRenderOption) {
 	if option in debug_render_options {

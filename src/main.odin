@@ -8,12 +8,15 @@ import "core:sort"
 import "display"
 import "mesh"
 import rm "render_math"
+import shd "shading"
 import sdl "vendor:sdl2"
 
 triangles_to_render: [dynamic]mesh.Triangle = nil
 
 camera_pos: rm.Vec3 = {0.0, 0.0, 0.0}
 proj_matrix: rm.Mat4
+
+global_light: ^shd.GlobalLight = nil
 
 is_running: bool = false
 previous_frame_time: u32 = 0
@@ -22,10 +25,12 @@ setup :: proc() -> (success: bool) {
 	success = display.init()
 
 	if success {
+		// Load models
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
 		mesh.mesh_to_render.translation.z = 5
+		// mesh.mesh_to_render.rotation.y = math.to_radians_f32(135)
 
 		// Initialize perspective projection matrix
 		fov := math.to_radians_f32(60.0)
@@ -34,6 +39,8 @@ setup :: proc() -> (success: bool) {
 		zfar: f32 = 100.0
 		proj_matrix = rm.create_projection_matrix(fov, aspect, znear, zfar)
 
+		// Create global light
+		global_light = shd.create_global_light(0.0, 90.0, 0.0)
 	}
 
 	return success
@@ -41,6 +48,7 @@ setup :: proc() -> (success: bool) {
 
 cleanup :: proc() {
 	mesh.destroy(mesh.mesh_to_render)
+	free(global_light)
 	display.deinit()
 }
 
@@ -86,6 +94,10 @@ process_input :: proc() {
 		case sdl.Keycode.NUM3:
 			display.toggle_render_option(.Triangle)
 			break
+
+		case sdl.Keycode.NUM4:
+			display.toggle_render_option(.Shading)
+			break
 		}
 		break
 	}
@@ -106,6 +118,8 @@ update :: proc() {
 	// mesh.mesh_to_render.translation += 0.001
 	mesh.mesh_to_render.rotation.x += 0.01
 
+	global_light.dir = rm.vec3_rotate_y(global_light.dir, 1)
+
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
 	translation_matrix: rm.Mat4 = rm.make_translation_mat4(mesh.mesh_to_render.translation)
@@ -125,6 +139,7 @@ update :: proc() {
 
 		transformed_vertices: [3]rm.Vec4
 		z_sum: f32 = 0
+		triangle_color := display.WHITE
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
@@ -152,33 +167,34 @@ update :: proc() {
 			z_sum += transformed_vertex.z
 		}
 
+		vec_a := rm.vec3(transformed_vertices[0])
+		vec_b := rm.vec3(transformed_vertices[1])
+		vec_c := rm.vec3(transformed_vertices[2])
+
+		// Get vector subtraction B - A and C - A
+		vec_ab := rm.vec_subtract(vec_b, vec_a)
+		vec_ab = rm.vec_normalize(vec_ab)
+		vec_ac := rm.vec_subtract(vec_c, vec_a)
+		vec_ac = rm.vec_normalize(vec_ac)
+
+		// Compute the face normal by using cross product
+		face_normal := rm.vec3_cross(vec_ab, vec_ac)
+		face_normal = rm.vec_normalize(face_normal)
+
+		// Perform backface culling
 		if display.is_culling_method(.CullBackface) {
-			// Perform backface culling
-			vec_a := rm.vec3(transformed_vertices[0])
-			vec_b := rm.vec3(transformed_vertices[1])
-			vec_c := rm.vec3(transformed_vertices[2])
-
-			// Get vector subtraction B - A and C - A
-			vec_ab := rm.vec_subtract(vec_b, vec_a)
-			vec_ab = rm.vec_normalize(vec_ab)
-			vec_ac := rm.vec_subtract(vec_c, vec_a)
-			vec_ac = rm.vec_normalize(vec_ac)
-
-			// Compute the face normal by using cross product
-			normal := rm.vec3_cross(vec_ab, vec_ac)
-			normal = rm.vec_normalize(normal)
-
 			// Find the vector a point in the triangle and the camera origin
 			camera_ray := rm.vec_subtract(camera_pos, vec_a)
 
 			// Calculate how aligned the camera ray with the face normal
 			// Using dot product
-			dot_product := rm.vec_dot(camera_ray, normal)
+			dot_product := rm.vec_dot(camera_ray, face_normal)
 
 			// Bypass the triangles that are looking away from the camera
 			if dot_product < 0.0 {
 				continue
 			}
+
 		}
 
 		projected_points: [3]rm.Vec4
@@ -201,13 +217,17 @@ update :: proc() {
 		// Calculate the average depth for each face based on the vertices after transformation
 		avg_depth: f32 = z_sum / 3.0
 
+
 		projected_triangle: mesh.Triangle = {
 			points    = {
 				{projected_points[0].x, projected_points[0].y},
 				{projected_points[1].x, projected_points[1].y},
 				{projected_points[2].x, projected_points[2].y},
 			},
-			color     = display.debug_colors[i % len(display.debug_colors)],
+			// TODO: Remove this or make as an option
+			// color     = display.debug_colors[i % len(display.debug_colors)],
+			color     = display.WHITE,
+			normal    = face_normal,
 			avg_depth = avg_depth,
 		}
 		// Save the projected triangle in the array of triangles to render
@@ -240,6 +260,13 @@ render :: proc() {
 			}
 		}
 
+		if display.is_debug_option_enabled(.Shading) {
+			// Calculate shading
+			light_intencity := rm.vec_dot(global_light.dir, triangle.normal)
+			triangle.color = shd.light_apply_intensity(triangle.color, light_intencity)
+		}
+
+
 		if display.is_debug_option_enabled(.Triangle) {
 			// Draw filled triangle
 			mesh.draw_filled_triangle(
@@ -262,7 +289,7 @@ render :: proc() {
 				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
-				display.WHITE,
+				display.BLACK,
 			)
 		}
 	}
