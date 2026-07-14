@@ -30,7 +30,6 @@ setup :: proc() -> (success: bool) {
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
 		mesh.mesh_to_render.translation.z = 5
-		// mesh.mesh_to_render.rotation.y = math.to_radians_f32(135)
 
 		// Initialize perspective projection matrix
 		fov := math.to_radians_f32(60.0)
@@ -204,6 +203,9 @@ update :: proc() {
 			// Scale into the view
 			projected_points[i].x *= f32(w)
 			projected_points[i].y *= f32(h)
+
+			// Invert y values to account for flipped screen y coordinate
+			projected_points[i].y *= -1.0
 
 			// Translate projected points to the middle of the screen
 			projected_points[i].x += f32(w)
