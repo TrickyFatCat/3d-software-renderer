@@ -40,7 +40,7 @@ setup :: proc() -> (success: bool) {
 		proj_matrix = rm.create_projection_matrix(fov, aspect, znear, zfar)
 
 		// Create global light
-		global_light = shd.create_global_light(0.0, 90.0, 0.0)
+		global_light = shd.create_global_light(0.0, 0.0, 0.0)
 	}
 
 	return success
@@ -118,8 +118,6 @@ update :: proc() {
 	// mesh.mesh_to_render.translation += 0.001
 	mesh.mesh_to_render.rotation.x += 0.01
 
-	global_light.dir = rm.vec3_rotate_y(global_light.dir, 1)
-
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
 	translation_matrix: rm.Mat4 = rm.make_translation_mat4(mesh.mesh_to_render.translation)
@@ -139,7 +137,6 @@ update :: proc() {
 
 		transformed_vertices: [3]rm.Vec4
 		z_sum: f32 = 0
-		triangle_color := display.WHITE
 
 		// Loop all three vertices of a face and apply transformation
 		for &vertex, i in face_vertices {
@@ -265,7 +262,6 @@ render :: proc() {
 			light_intencity := rm.vec_dot(global_light.dir, triangle.normal)
 			triangle.color = shd.light_apply_intensity(triangle.color, light_intencity)
 		}
-
 
 		if display.is_debug_option_enabled(.Triangle) {
 			// Draw filled triangle
