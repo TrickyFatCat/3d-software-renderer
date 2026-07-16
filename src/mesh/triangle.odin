@@ -4,14 +4,17 @@ import "../display"
 import rm "../render_math"
 
 Face :: struct {
-	a, b, c, color: u32,
+	a_uv, b_uv, c_uv: Tex2,
+	a, b, c:          u32,
+	color:            display.Color,
 }
 
 Triangle :: struct {
-	points:    [3]rm.Vec2,
-	normal:    rm.Vec3,
-	color:     u32,
-	avg_depth: f32,
+	points:     [3]rm.Vec2,
+	normal:     rm.Vec3,
+	tex_coords: [3]Tex2,
+	color:      u32,
+	avg_depth:  f32,
 }
 
 
@@ -145,6 +148,7 @@ fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color
 	}
 }
 
+@(private)
 swap :: proc(a: ^$T, b: ^T) {
 	tmp := a^
 	a^ = b^
