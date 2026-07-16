@@ -35,35 +35,76 @@ is_culling_method :: proc(method: CullingMethod) -> bool {
 
 
 // Debug render options
-DebugRenderOption :: enum u8 {
+RenderOption :: enum u8 {
 	Vertex,
 	Edge,
 	Triangle,
 	Shading,
+	Texture,
 }
 
-DebugRenderOptions :: bit_set[DebugRenderOption]
+RenderOptions :: bit_set[RenderOption]
 
 @(private)
-debug_render_options: DebugRenderOptions = {.Vertex, .Edge, .Triangle, .Shading}
+render_options: RenderOptions = {.Vertex, .Edge, .Shading, .Texture}
 
-toggle_render_option :: proc(option: DebugRenderOption) {
-	if option in debug_render_options {
-		debug_render_options -= {option}
+toggle_render_option :: proc(option: RenderOption) {
+	if option in render_options {
+		render_options -= {option}
 
 	} else {
-		debug_render_options += {option}
+		render_options += {option}
 	}
 
 	when ODIN_DEBUG {
-		result: string = "ENABLED" if option in debug_render_options else "DISABLED"
+		result: string = "ENABLED" if option in render_options else "DISABLED"
 		option_name: string = reflect.enum_string(option)
 		log.infof("%s render is %s.", option_name, result)
 	}
 }
 
-is_debug_option_enabled :: proc(option: DebugRenderOption) -> bool {
-	return option in debug_render_options
+enable_render_option :: proc(option: RenderOption) -> (success: bool = true) {
+	if option in render_options {
+		return !success
+	}
+
+	render_options += {option}
+
+	when ODIN_DEBUG {
+		option_name: string = reflect.enum_string(option)
+		log.infof("%s render is ENABLED.", option_name)
+	}
+
+	return success
+}
+
+disable_render_option :: proc(option: RenderOption) -> (success: bool = true) {
+	if !(option in render_options) {
+		return !success
+	}
+
+	render_options -= {option}
+
+	when ODIN_DEBUG {
+		option_name: string = reflect.enum_string(option)
+		log.infof("%s render is DISABLED.", option_name)
+	}
+
+	return success
+}
+
+swap_render_options :: proc(option_a, option_b: RenderOption) {
+	if option_a in render_options {
+		disable_render_option(option_a)
+		enable_render_option(option_b)
+	} else {
+		enable_render_option(option_a)
+		disable_render_option(option_b)
+	}
+}
+
+is_debug_option_enabled :: proc(option: RenderOption) -> bool {
+	return option in render_options
 }
 
 // Grid draw option
