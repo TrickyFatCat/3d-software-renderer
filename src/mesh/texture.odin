@@ -1,5 +1,7 @@
 package mesh
 
+import "../display"
+
 Tex2 :: struct {
 	u, v: f32,
 }
@@ -8,9 +10,9 @@ texture_width: i32 = 64
 
 texture_height: i32 = 64
 
-texture: [dynamic]u32
+texture: [dynamic]display.Color
 
-REDBRICK_TEXTURE: []u32 = {
+REDBRICK_TEXTURE: []display.Color = {
 	0x38,
 	0x38,
 	0x38,
