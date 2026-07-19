@@ -149,6 +149,26 @@ fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color
 	}
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// Draw a textured triangle based on a texture array of colors.
+// We split the original triangle in two, half flat-bottom and half flat-top.
+///////////////////////////////////////////////////////////////////////////////
+//
+//        v0
+//        /\
+//       /  \
+//      /    \
+//     /      \
+//   v1--------\
+//     \_       \
+//        \_     \
+//           \_   \
+//              \_ \
+//                 \\
+//                   \
+//                    v2
+//
+///////////////////////////////////////////////////////////////////////////////
 draw_textured_triangle :: proc(
 	x0, y0, x1, y1, x2, y2: i32,
 	u0, v0, u1, v1, u2, v2: f32,
