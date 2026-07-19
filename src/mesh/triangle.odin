@@ -150,6 +150,38 @@ fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// Function to draw the textured pixel at position x and y using interpolation
+///////////////////////////////////////////////////////////////////////////////
+draw_texel :: proc(
+	x, y: i32,
+	tex: Texture,
+	point_a, point_b, point_c: rm.Vec2,
+	u0, v0, u1, v1, u2, v2: f32,
+) {
+	point_p := rm.Vec2{f32(x), f32(y)}
+
+	weights := get_barycentric_weights(point_a, point_b, point_c, point_p)
+
+	alpha := weights.x
+	beta := weights.y
+	gamma := weights.z
+
+	// Perform the interpolation of all U and V values using barycentric weights
+	interpolated_u: f32 = u0 * alpha + u1 * beta + u2 * gamma
+	interpolated_v: f32 = v0 * alpha + v1 * beta + v2 * gamma
+
+	// Map the UV coordinate to the full texture width and heigth
+	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width))))
+	tex_y: u32 = u32(math.abs(i32(interpolated_v * f32(texture_height))))
+
+	// Make sure that it won't be out of bounds
+	tex_x = min(tex_x, texture_width - 1)
+	tex_y = min(tex_y, texture_height - 1)
+
+	display.draw_pixel(int(x), int(y), tex[(texture_width * tex_y) + tex_x])
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // Draw a textured triangle based on a texture array of colors.
 // We split the original triangle in two, half flat-bottom and half flat-top.
 ///////////////////////////////////////////////////////////////////////////////
@@ -172,7 +204,7 @@ fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color
 draw_textured_triangle :: proc(
 	x0, y0, x1, y1, x2, y2: i32,
 	u0, v0, u1, v1, u2, v2: f32,
-	tex: [dynamic]display.Color,
+	tex: Texture,
 ) {
 	// Shadow x
 	x0 := x0
@@ -216,6 +248,11 @@ draw_textured_triangle :: proc(
 		swap(&v0, &v1)
 	}
 
+	// Create vector points after we sort vertices
+	point_a := rm.Vec2{f32(x0), f32(y0)}
+	point_b := rm.Vec2{f32(x1), f32(y1)}
+	point_c := rm.Vec2{f32(x2), f32(y2)}
+
 	////////////////////////////////////////////////////////
 	// Render the upper part of the triangle (flat-bottom)//
 	////////////////////////////////////////////////////////
@@ -242,7 +279,8 @@ draw_textured_triangle :: proc(
 			}
 
 			for x := x_start; x < x_end; x += 1 {
-				display.draw_pixel(int(x), int(y), display.MAGENTA)
+				// display.draw_pixel(int(x), int(y), display.MAGENTA)
+				draw_texel(x, y, tex, point_a, point_b, point_c, u0, v0, u1, v1, u2, v2)
 			}
 		}
 	}
@@ -273,7 +311,8 @@ draw_textured_triangle :: proc(
 			}
 
 			for x := x_start; x < x_end; x += 1 {
-				display.draw_pixel(int(x), int(y), display.MAGENTA)
+				// display.draw_pixel(int(x), int(y), display.MAGENTA)
+				draw_texel(x, y, tex, point_a, point_b, point_c, u0, v0, u1, v1, u2, v2)
 			}
 		}
 	}
