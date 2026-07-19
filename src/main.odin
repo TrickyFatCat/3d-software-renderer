@@ -28,7 +28,23 @@ setup :: proc() -> (success: bool) {
 		// Load models
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
-		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
+		// mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
+		// mesh.texture = make([]u32, len(mesh.REDBRICK_TEXTURE))
+		mesh.mesh_to_render = mesh.create()
+		mesh.load_cube_mesh_data()
+		mesh.texture = make([dynamic]u32)
+
+		for i := 0; i < len(mesh.REDBRICK_TEXTURE); i += 4 {
+			bytes: [4]u8 = {
+				mesh.REDBRICK_TEXTURE[i],
+				mesh.REDBRICK_TEXTURE[i + 1],
+				mesh.REDBRICK_TEXTURE[i + 2],
+				mesh.REDBRICK_TEXTURE[i + 3],
+			}
+			color := transmute(u32)bytes
+			append(&mesh.texture, color)
+		}
+
 		mesh.mesh_to_render.translation.z = 5
 
 		// Initialize perspective projection matrix
@@ -47,6 +63,7 @@ setup :: proc() -> (success: bool) {
 
 cleanup :: proc() {
 	mesh.destroy(mesh.mesh_to_render)
+	delete(mesh.texture)
 	free(global_light)
 	display.deinit()
 }
@@ -91,7 +108,7 @@ process_input :: proc() {
 			break
 
 		case sdl.Keycode.NUM3:
-			display.toggle_render_option(.Triangle)
+			display.swap_render_options(.Triangle, .Texture)
 			break
 
 		case sdl.Keycode.NUM4:
@@ -174,7 +191,7 @@ update :: proc() {
 		vec_ac = rm.vec_normalize(vec_ac)
 
 		// Compute the face normal by using cross product
-		face_normal := rm.vec3_cross(vec_ab, vec_ac)
+		face_normal := rm.vec_cross(vec_ab, vec_ac)
 		face_normal = rm.vec_normalize(face_normal)
 
 		// Perform backface culling
@@ -218,16 +235,21 @@ update :: proc() {
 
 
 		projected_triangle: mesh.Triangle = {
-			points    = {
+			points     = {
 				{projected_points[0].x, projected_points[0].y},
 				{projected_points[1].x, projected_points[1].y},
 				{projected_points[2].x, projected_points[2].y},
 			},
 			// TODO: Remove this or make as an option
 			// color     = display.debug_colors[i % len(display.debug_colors)],
-			color     = display.WHITE,
-			normal    = face_normal,
-			avg_depth = avg_depth,
+			color      = face.color,
+			normal     = face_normal,
+			tex_coords = {
+				{face.a_uv.u, face.a_uv.v},
+				{face.b_uv.u, face.b_uv.v},
+				{face.c_uv.u, face.c_uv.v},
+			},
+			avg_depth  = avg_depth,
 		}
 		// Save the projected triangle in the array of triangles to render
 		append(&triangles_to_render, projected_triangle)
@@ -275,6 +297,25 @@ render :: proc() {
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
 				triangle.color,
+			)
+		}
+
+		if display.is_debug_option_enabled(.Texture) {
+			// Draw textured triangle
+			mesh.draw_textured_triangle(
+				i32(triangle.points[0].x),
+				i32(triangle.points[0].y),
+				i32(triangle.points[1].x),
+				i32(triangle.points[1].y),
+				i32(triangle.points[2].x),
+				i32(triangle.points[2].y),
+				triangle.tex_coords[0].u,
+				triangle.tex_coords[0].v,
+				triangle.tex_coords[1].u,
+				triangle.tex_coords[1].v,
+				triangle.tex_coords[2].u,
+				triangle.tex_coords[2].v,
+				mesh.texture,
 			)
 		}
 
