@@ -6,13 +6,15 @@ Tex2 :: struct {
 	u, v: f32,
 }
 
-texture_width: i32 = 64
+texture_width: u32 = 64
 
-texture_height: i32 = 64
+texture_height: u32 = 64
 
-texture: [dynamic]display.Color
+Texture :: [dynamic]display.Color
 
-REDBRICK_TEXTURE: []display.Color = {
+texture: Texture
+
+REDBRICK_TEXTURE: []u8 = {
 	0x38,
 	0x38,
 	0x38,
