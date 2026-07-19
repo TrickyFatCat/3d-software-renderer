@@ -130,12 +130,23 @@ vec_divide :: proc {
 	vec3_divide,
 }
 
+@(private)
+vec2_cross :: proc(a: Vec2, b: Vec2) -> (cross_product: f32) {
+	cross_product = a.x * b.y - a.y * b.x
+	return cross_product
+}
 
+@(private)
 vec3_cross :: proc(a: Vec3, b: Vec3) -> (cross_product: Vec3) {
 	cross_product.x = a.y * b.z - a.z * b.y
 	cross_product.y = a.z * b.x - a.x * b.z
 	cross_product.z = a.x * b.y - a.y * b.x
 	return cross_product
+}
+
+vec_cross :: proc {
+	vec2_cross,
+	vec3_cross,
 }
 
 @(private)
