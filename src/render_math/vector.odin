@@ -204,3 +204,10 @@ vec3 :: proc(v: Vec4) -> (new_vec: Vec3) {
 	return new_vec
 }
 
+
+vec2 :: proc(v: Vec4) -> (new_vec: Vec2) {
+	new_vec.x = v.x
+	new_vec.y = v.y
+	return new_vec
+}
+
