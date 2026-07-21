@@ -2,6 +2,7 @@ package mesh
 
 import "../display"
 import rm "../render_math"
+import "core:log"
 import "core:math"
 
 Face :: struct {
@@ -11,9 +12,9 @@ Face :: struct {
 }
 
 Triangle :: struct {
-	points:     [3]rm.Vec2,
-	normal:     rm.Vec3,
+	points:     [3]rm.Vec4,
 	tex_coords: [3]Tex2,
+	normal:     rm.Vec3,
 	color:      u32,
 	avg_depth:  f32,
 }
@@ -155,20 +156,38 @@ fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color
 draw_texel :: proc(
 	x, y: i32,
 	tex: Texture,
-	point_a, point_b, point_c: rm.Vec2,
-	u0, v0, u1, v1, u2, v2: f32,
+	point_a, point_b, point_c: rm.Vec4,
+	a_uv, b_uv, c_uv: Tex2,
 ) {
-	point_p := rm.Vec2{f32(x), f32(y)}
+	p := rm.Vec2{f32(x), f32(y)}
+	a := rm.vec2(point_a)
+	b := rm.vec2(point_b)
+	c := rm.vec2(point_c)
 
-	weights := get_barycentric_weights(point_a, point_b, point_c, point_p)
+	weights := get_barycentric_weights(a, b, c, p)
 
 	alpha := weights.x
 	beta := weights.y
 	gamma := weights.z
 
-	// Perform the interpolation of all U and V values using barycentric weights
-	interpolated_u: f32 = u0 * alpha + u1 * beta + u2 * gamma
-	interpolated_v: f32 = v0 * alpha + v1 * beta + v2 * gamma
+	// Variables to store the interpolated values of U, V, and also 1/w for the current pixel
+	interpolated_u: f32
+	interpolated_v: f32
+	interpolated_reciprocal_w: f32
+
+	// Perform the interpolation of all U/w and V/w values using barycentric weights and a factor of 1/w
+	interpolated_u =
+		(a_uv.u / point_a.w) * alpha + (b_uv.u / point_b.w) * beta + (c_uv.u / point_c.w) * gamma
+	interpolated_v =
+		(a_uv.v / point_a.w) * alpha + (b_uv.v / point_b.w) * beta + (c_uv.v / point_c.w) * gamma
+
+	// Interpolate the value of 1/w for the current pixel
+	interpolated_reciprocal_w =
+		(1 / point_a.w) * alpha + (1 / point_b.w) * beta + (1 / point_c.w) * gamma
+
+	// Now we can divide back both interpolated values by 1/w
+	interpolated_u /= interpolated_reciprocal_w
+	interpolated_v /= interpolated_reciprocal_w
 
 	// Map the UV coordinate to the full texture width and heigth
 	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width))))
@@ -203,6 +222,7 @@ draw_texel :: proc(
 ///////////////////////////////////////////////////////////////////////////////
 draw_textured_triangle :: proc(
 	x0, y0, x1, y1, x2, y2: i32,
+	z0, w0, z1, w1, z2, w2: f32,
 	u0, v0, u1, v1, u2, v2: f32,
 	tex: Texture,
 ) {
@@ -215,6 +235,16 @@ draw_textured_triangle :: proc(
 	y0 := y0
 	y1 := y1
 	y2 := y2
+
+	// Shadow z
+	z0 := z0
+	z1 := z1
+	z2 := z2
+
+	// Shadow w
+	w0 := w0
+	w1 := w1
+	w2 := w2
 
 	// Shadow u
 	u0 := u0
@@ -230,6 +260,8 @@ draw_textured_triangle :: proc(
 	if y0 > y1 {
 		swap(&x0, &x1)
 		swap(&y0, &y1)
+		swap(&z0, &z1)
+		swap(&w0, &w1)
 		swap(&u0, &u1)
 		swap(&v0, &v1)
 	}
@@ -237,6 +269,8 @@ draw_textured_triangle :: proc(
 	if y1 > y2 {
 		swap(&x1, &x2)
 		swap(&y1, &y2)
+		swap(&z1, &z2)
+		swap(&w1, &w2)
 		swap(&u1, &u2)
 		swap(&v1, &v2)
 	}
@@ -244,14 +278,19 @@ draw_textured_triangle :: proc(
 	if y0 > y1 {
 		swap(&x0, &x1)
 		swap(&y0, &y1)
+		swap(&z0, &z1)
+		swap(&w0, &w1)
 		swap(&u0, &u1)
 		swap(&v0, &v1)
 	}
 
-	// Create vector points after we sort vertices
-	point_a := rm.Vec2{f32(x0), f32(y0)}
-	point_b := rm.Vec2{f32(x1), f32(y1)}
-	point_c := rm.Vec2{f32(x2), f32(y2)}
+	// Create vector points and texture coordinates after we sort vertices
+	point_a := rm.Vec4{f32(x0), f32(y0), z0, w0}
+	point_b := rm.Vec4{f32(x1), f32(y1), z1, w1}
+	point_c := rm.Vec4{f32(x2), f32(y2), z2, w2}
+	a_uv := Tex2{u0, v0}
+	b_uv := Tex2{u1, v1}
+	c_uv := Tex2{u2, v2}
 
 	////////////////////////////////////////////////////////
 	// Render the upper part of the triangle (flat-bottom)//
@@ -279,8 +318,7 @@ draw_textured_triangle :: proc(
 			}
 
 			for x := x_start; x < x_end; x += 1 {
-				// display.draw_pixel(int(x), int(y), display.MAGENTA)
-				draw_texel(x, y, tex, point_a, point_b, point_c, u0, v0, u1, v1, u2, v2)
+				draw_texel(x, y, tex, point_a, point_b, point_c, a_uv, b_uv, c_uv)
 			}
 		}
 	}
@@ -311,8 +349,7 @@ draw_textured_triangle :: proc(
 			}
 
 			for x := x_start; x < x_end; x += 1 {
-				// display.draw_pixel(int(x), int(y), display.MAGENTA)
-				draw_texel(x, y, tex, point_a, point_b, point_c, u0, v0, u1, v1, u2, v2)
+				draw_texel(x, y, tex, point_a, point_b, point_c, a_uv, b_uv, c_uv)
 			}
 		}
 	}

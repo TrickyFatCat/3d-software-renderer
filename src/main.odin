@@ -29,7 +29,6 @@ setup :: proc() -> (success: bool) {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 		// mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
-		// mesh.texture = make([]u32, len(mesh.REDBRICK_TEXTURE))
 		mesh.mesh_to_render = mesh.create()
 		mesh.load_cube_mesh_data()
 		mesh.texture = make([dynamic]u32)
@@ -132,7 +131,7 @@ update :: proc() {
 
 	// mesh.mesh_to_render.scale += 0.001
 	// mesh.mesh_to_render.translation += 0.001
-	mesh.mesh_to_render.rotation.x += 0.01
+	mesh.mesh_to_render.rotation.y += 0.01
 
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
@@ -236,9 +235,24 @@ update :: proc() {
 
 		projected_triangle: mesh.Triangle = {
 			points     = {
-				{projected_points[0].x, projected_points[0].y},
-				{projected_points[1].x, projected_points[1].y},
-				{projected_points[2].x, projected_points[2].y},
+				{
+					projected_points[0].x,
+					projected_points[0].y,
+					projected_points[0].z,
+					projected_points[0].w,
+				},
+				{
+					projected_points[1].x,
+					projected_points[1].y,
+					projected_points[1].z,
+					projected_points[1].w,
+				},
+				{
+					projected_points[2].x,
+					projected_points[2].y,
+					projected_points[2].z,
+					projected_points[2].w,
+				},
 			},
 			// TODO: Remove this or make as an option
 			// color     = display.debug_colors[i % len(display.debug_colors)],
@@ -309,6 +323,12 @@ render :: proc() {
 				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
 				i32(triangle.points[2].y),
+				triangle.points[0].z,
+				triangle.points[0].w,
+				triangle.points[1].z,
+				triangle.points[1].w,
+				triangle.points[2].z,
+				triangle.points[2].w,
 				triangle.tex_coords[0].u,
 				triangle.tex_coords[0].v,
 				triangle.tex_coords[1].u,
