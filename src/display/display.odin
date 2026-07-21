@@ -67,7 +67,7 @@ draw_line :: proc(x0: i32, y0: i32, x1: i32, y1: i32, color: Color) {
 }
 
 draw_pixel :: proc(x: int, y: int, color: Color) {
-	if (x < 0 && x > int(window_height) && y < 0 && y > int(window_height)) {
+	if (x < 0 || x > int(window_width) || y < 0 || y > int(window_height)) {
 		return
 	}
 
