@@ -109,7 +109,7 @@ create_texture :: proc() -> bool {
 
 	color_buffer_texture = sdl.CreateTexture(
 		renderer,
-		sdl.PixelFormatEnum.ARGB8888,
+		sdl.PixelFormatEnum.RGBA32,
 		sdl.TextureAccess.STREAMING,
 		i32(window_width),
 		i32(window_height),
