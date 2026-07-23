@@ -50,12 +50,12 @@ light_apply_intensity :: proc(
 		percentage_factor = 1
 	}
 
-	a := orig_color & 0xFF000000
-	r := u32(f32(orig_color & 0x00FF0000) * percentage_factor)
-	g := u32(f32(orig_color & 0x0000FF00) * percentage_factor)
-	b := u32(f32(orig_color & 0x000000FF) * percentage_factor)
+	r := u32(f32(orig_color & 0x000000FF) * percentage_factor) & 0xFF
+	g := u32(f32(orig_color >> 8 & 0xFF) * percentage_factor) & 0xFF
+	b := u32(f32(orig_color >> 16 & 0xFF) * percentage_factor) & 0xFF
+	a := orig_color >> 24 & 0xFF
 
-	new_color = a | (r & 0x00FF0000) | (g & 0x0000FF00) | (b & 0x000000FF)
+	new_color = r | (g << 8) | (b << 16) | (a << 24)
 	return new_color
 }
 
