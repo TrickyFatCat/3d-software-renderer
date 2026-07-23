@@ -28,21 +28,23 @@ setup :: proc() -> (success: bool) {
 		// Load models
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
+
 		// mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
+		mesh.load_texture_from_image("../assets/cube/cube.png")
 		mesh.mesh_to_render = mesh.create()
 		mesh.load_cube_mesh_data()
-		mesh.texture = make([dynamic]u32)
+		// mesh.texture = make([dynamic]u32)
 
-		for i := 0; i < len(mesh.REDBRICK_TEXTURE); i += 4 {
-			bytes: [4]u8 = {
-				mesh.REDBRICK_TEXTURE[i],
-				mesh.REDBRICK_TEXTURE[i + 1],
-				mesh.REDBRICK_TEXTURE[i + 2],
-				mesh.REDBRICK_TEXTURE[i + 3],
-			}
-			color := transmute(u32)bytes
-			append(&mesh.texture, color)
-		}
+		// for i := 0; i < len(mesh.REDBRICK_TEXTURE); i += 4 {
+		// 	bytes: [4]u8 = {
+		// 		mesh.REDBRICK_TEXTURE[i],
+		// 		mesh.REDBRICK_TEXTURE[i + 1],
+		// 		mesh.REDBRICK_TEXTURE[i + 2],
+		// 		mesh.REDBRICK_TEXTURE[i + 3],
+		// 	}
+		// 	color := transmute(u32)bytes
+		// 	append(&mesh.texture, color)
+		// }
 
 		mesh.mesh_to_render.translation.z = 5
 

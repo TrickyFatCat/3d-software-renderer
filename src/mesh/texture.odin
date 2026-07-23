@@ -1,6 +1,9 @@
 package mesh
 
 import "../display"
+import "core:image"
+import "core:image/png"
+import "core:log"
 
 Tex2 :: struct {
 	u, v: f32,
@@ -13,6 +16,42 @@ texture_height: u32 = 64
 Texture :: [dynamic]display.Color
 
 texture: Texture
+
+load_texture_from_image :: proc(p: string) {
+	img, err := png.load_from_file(p, png.Options{}, context.temp_allocator)
+
+	if err != nil {
+		when ODIN_DEBUG {
+			log.errorf("Failed to load texture from image. Reason: %s", err)
+		}
+
+		return
+	}
+
+	texture = make(Texture)
+	texture_width = u32(img.width)
+	texture_height = u32(img.height)
+
+	pixels := img.pixels.buf[:]
+	channels := img.channels // 3 = RGB, 4 = RGBA
+
+	i := 0
+	for i < len(pixels) {
+		r := pixels[i]
+		g := pixels[i + 1]
+		b := pixels[i + 2]
+		a: u8 = 255
+		if channels == 4 {
+			a = pixels[i + 3]
+		}
+		color := u32(a) << 24 | u32(b) << 16 | u32(g) << 8 | u32(r)
+		// color := u32(r) | u32(g) << 8 | u32(b) << 16 | u32(a) << 24
+		append(&texture, color)
+
+		i += channels
+	}
+	free(img, context.temp_allocator)
+}
 
 REDBRICK_TEXTURE: []u8 = {
 	0x38,
