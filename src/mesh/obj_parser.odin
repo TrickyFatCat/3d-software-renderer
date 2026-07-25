@@ -47,6 +47,8 @@ parse_obj_file :: proc(file_data: ^string) -> (new_mesh: ^Mesh, success: bool) {
 	}
 
 	new_mesh = create()
+	tex_coords := make([dynamic]Tex2)
+	defer delete(tex_coords)
 
 	for line in strings.split_lines_iterator(file_data) {
 		if len(line) < 2 {
@@ -73,24 +75,54 @@ parse_obj_file :: proc(file_data: ^string) -> (new_mesh: ^Mesh, success: bool) {
 			append(&new_mesh.vertices, vertex)
 			break
 
+		case "vt":
+			line_data := strings.split(line[3:], " ")
+			defer delete(line_data)
+			vt: Tex2
+
+			for &value, i in line_data {
+				float_num, ok := strconv.parse_f32(value)
+
+				if !ok {
+					continue
+				}
+
+				if i == 0 {
+					vt.u = float_num
+				} else if i == 1 {
+					vt.v = float_num
+				}
+			}
+
+			append(&tex_coords, vt)
+			break
+
 		case "f ":
 			line_data := strings.split(line[2:], " ")
 			defer delete(line_data)
-			int_arr: [3]u32
+			vertex_indexes: [3]u32
+			vt_indexes: [3]u32
 
 			for &value, i in line_data {
-				point_data := value[:strings.index_rune(value, '/')]
-				int_num, ok := strconv.parse_uint(point_data)
+				split_data, err := strings.split(value, "/")
+				defer delete(split_data)
 
-				if ok {
-					int_arr[i] = u32(int_num)
+				v_index, _ := strconv.parse_uint(split_data[0])
+				vt_index, _ := strconv.parse_uint(split_data[1])
+
+				if err == nil {
+					vertex_indexes[i] = u32(v_index - 1)
+					vt_indexes[i] = u32(vt_index - 1)
 				}
 			}
 
 			face: Face = {
-				a = int_arr[0],
-				b = int_arr[1],
-				c = int_arr[2],
+				a    = vertex_indexes[0],
+				b    = vertex_indexes[1],
+				c    = vertex_indexes[2],
+				a_uv = tex_coords[vt_indexes[0]],
+				b_uv = tex_coords[vt_indexes[1]],
+				c_uv = tex_coords[vt_indexes[2]],
 			}
 			append(&new_mesh.faces, face)
 			break

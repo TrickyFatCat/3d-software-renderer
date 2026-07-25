@@ -29,10 +29,10 @@ setup :: proc() -> (success: bool) {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 
-		// mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
+		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
 		mesh.load_texture_from_image("../assets/cube/cube.png")
-		mesh.mesh_to_render = mesh.create()
-		mesh.load_cube_mesh_data()
+		// mesh.mesh_to_render = mesh.create()
+		// mesh.load_cube_mesh_data()
 		// mesh.texture = make([dynamic]u32)
 
 		// for i := 0; i < len(mesh.REDBRICK_TEXTURE); i += 4 {
@@ -148,9 +148,9 @@ update :: proc() {
 	// Loop all triangle faces in our mesh
 	for &face, i in mesh.mesh_to_render.faces {
 		face_vertices: [3]rm.Vec3
-		face_vertices[0] = mesh.mesh_to_render.vertices[face.a - 1]
-		face_vertices[1] = mesh.mesh_to_render.vertices[face.b - 1]
-		face_vertices[2] = mesh.mesh_to_render.vertices[face.c - 1]
+		face_vertices[0] = mesh.mesh_to_render.vertices[face.a]
+		face_vertices[1] = mesh.mesh_to_render.vertices[face.b]
+		face_vertices[2] = mesh.mesh_to_render.vertices[face.c]
 
 		transformed_vertices: [3]rm.Vec4
 		z_sum: f32 = 0
