@@ -2,7 +2,6 @@ package mesh
 
 import "../display"
 import rm "../render_math"
-import "core:log"
 import "core:math"
 
 Face :: struct {
@@ -283,6 +282,11 @@ draw_textured_triangle :: proc(
 		swap(&u0, &u1)
 		swap(&v0, &v1)
 	}
+
+	// Flip the V component to account for inverted UV-coordinates (V grows downwards)
+	v0 = 1 - v0
+	v1 = 1 - v1
+	v2 = 1 - v2
 
 	// Create vector points and texture coordinates after we sort vertices
 	point_a := rm.Vec4{f32(x0), f32(y0), z0, w0}
