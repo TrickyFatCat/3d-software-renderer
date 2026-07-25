@@ -29,8 +29,9 @@ setup :: proc() -> (success: bool) {
 		f22_mesh_obj := #load("../assets/f22/f22.obj")
 		cube_mesh_obj := #load("../assets/cube/cube.obj")
 
-		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(cube_mesh_obj)
-		mesh.load_texture_from_image("../assets/cube/cube.png")
+		mesh.mesh_to_render, _ = mesh.load_mesh_from_obj(f22_mesh_obj)
+		// mesh.load_texture_from_image("../assets/cube/cube.png")
+		mesh.load_texture_from_image("../assets/f22/f22.png")
 		// mesh.mesh_to_render = mesh.create()
 		// mesh.load_cube_mesh_data()
 		// mesh.texture = make([dynamic]u32)

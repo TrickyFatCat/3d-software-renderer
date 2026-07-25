@@ -189,12 +189,8 @@ draw_texel :: proc(
 	interpolated_v /= interpolated_reciprocal_w
 
 	// Map the UV coordinate to the full texture width and heigth
-	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width))))
-	tex_y: u32 = u32(math.abs(i32(interpolated_v * f32(texture_height))))
-
-	// Make sure that it won't be out of bounds
-	tex_x = min(tex_x, texture_width - 1)
-	tex_y = min(tex_y, texture_height - 1)
+	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width)))) % texture_width
+	tex_y: u32 = u32(math.abs(i32(interpolated_v * f32(texture_height)))) % texture_height
 
 	display.draw_pixel(int(x), int(y), tex[(texture_width * tex_y) + tex_x])
 }
