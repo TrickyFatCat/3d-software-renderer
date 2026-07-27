@@ -13,17 +13,23 @@ init :: proc() -> (success: bool) {
 		success = init_color_buffer()
 	}
 
+	if success {
+		success = create_z_buffer() == nil
+	}
+
 	return success
 }
 
 deinit :: proc() {
 	destroy_color_buffer()
+	destroy_z_buffer()
 	destroy_window()
 }
 
 finish_render :: proc(clear_color: Color = BLACK) {
 	render_color_buffer_texture()
 	clear_color_buffer(clear_color)
+	clear_z_buffer()
 	sdl.RenderPresent(renderer)
 }
 

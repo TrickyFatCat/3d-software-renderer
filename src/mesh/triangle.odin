@@ -192,7 +192,21 @@ draw_texel :: proc(
 	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width)))) % texture_width
 	tex_y: u32 = u32(math.abs(i32(interpolated_v * f32(texture_height)))) % texture_height
 
-	display.draw_pixel(int(x), int(y), tex[(texture_width * tex_y) + tex_x])
+	// Adjust 1/w so the pixels that are closer to the camera have smaller value
+	interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w
+
+	// Only draw the pixel if the depth value is less than the one previously stored in the z-buffer
+	window_width, window_height := display.get_window_dimentions()
+	z_index := u32((i32(window_width) * y) + x)
+	prev_depth := display.get_z_buffer_value(z_index)
+
+	if interpolated_reciprocal_w < prev_depth {
+		// Draw a pixel at position (x, y) with the color that comes from the mapped texture
+		display.draw_pixel(int(x), int(y), tex[(texture_width * tex_y) + tex_x])
+
+		// Update the z-buffer value with the 1/w of this current pixel
+		display.set_z_buffer_value(z_index, interpolated_reciprocal_w)
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
