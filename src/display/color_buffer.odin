@@ -84,7 +84,7 @@ set_pixel_color :: proc(p_index: int, color: Color) {
 		}
 	}
 
-	if p_index < 0 || p_index >= buffer_len {
+	if p_index >= buffer_len {
 		return
 	}
 

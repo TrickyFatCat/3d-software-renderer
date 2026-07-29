@@ -15,7 +15,7 @@ set_z_buffer_value :: proc(p_index: u32, depth: f32) {
 		}
 	}
 
-	if p_index < 0 || p_index >= u32(buffer_len) {
+	if p_index >= u32(buffer_len) {
 		return
 	}
 
@@ -32,7 +32,7 @@ get_z_buffer_value :: proc(p_index: u32) -> (depth: f32 = 0.0) {
 		}
 	}
 
-	if p_index < 0 || p_index >= u32(buffer_len) {
+	if p_index >= u32(buffer_len) {
 		return depth
 	}
 
