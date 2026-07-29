@@ -1,5 +1,6 @@
 package mesh
 
+import "../display"
 import math "../render_math"
 import "core:log"
 import "core:os"
@@ -117,12 +118,13 @@ parse_obj_file :: proc(file_data: ^string) -> (new_mesh: ^Mesh, success: bool) {
 			}
 
 			face: Face = {
-				a    = vertex_indexes[0],
-				b    = vertex_indexes[1],
-				c    = vertex_indexes[2],
-				a_uv = tex_coords[vt_indexes[0]],
-				b_uv = tex_coords[vt_indexes[1]],
-				c_uv = tex_coords[vt_indexes[2]],
+				a     = vertex_indexes[0],
+				b     = vertex_indexes[1],
+				c     = vertex_indexes[2],
+				a_uv  = tex_coords[vt_indexes[0]],
+				b_uv  = tex_coords[vt_indexes[1]],
+				c_uv  = tex_coords[vt_indexes[2]],
+				color = display.WHITE,
 			}
 			append(&new_mesh.faces, face)
 			break

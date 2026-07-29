@@ -4,7 +4,6 @@ import "core:fmt"
 import "core:log"
 import "core:math"
 import "core:mem"
-import "core:sort"
 import "display"
 import "mesh"
 import rm "render_math"
@@ -134,7 +133,7 @@ update :: proc() {
 
 	// mesh.mesh_to_render.scale += 0.001
 	// mesh.mesh_to_render.translation += 0.001
-	mesh.mesh_to_render.rotation.y += 0.01
+	mesh.mesh_to_render.rotation.x += 0.01
 
 	// Create a scale matrix that will be used to multiply the mesh vertices
 	scale_matrix: rm.Mat4 = rm.make_scale_mat4(mesh.mesh_to_render.scale)
@@ -232,10 +231,6 @@ update :: proc() {
 
 		}
 
-		// Calculate the average depth for each face based on the vertices after transformation
-		avg_depth: f32 = z_sum / 3.0
-
-
 		projected_triangle: mesh.Triangle = {
 			points     = {
 				{
@@ -266,18 +261,10 @@ update :: proc() {
 				{face.b_uv.u, face.b_uv.v},
 				{face.c_uv.u, face.c_uv.v},
 			},
-			avg_depth  = avg_depth,
 		}
 		// Save the projected triangle in the array of triangles to render
 		append(&triangles_to_render, projected_triangle)
 	}
-
-	// Sort triangles by their average depth
-	compare_triangles :: proc(a, b: mesh.Triangle) -> int {
-		return sort.compare_f32s(b.avg_depth, a.avg_depth)
-	}
-
-	sort.quick_sort_proc(triangles_to_render[:], compare_triangles)
 }
 
 render :: proc() {
@@ -308,11 +295,17 @@ render :: proc() {
 			// Draw filled triangle
 			mesh.draw_filled_triangle(
 				i32(triangle.points[0].x),
-				i32(triangle.points[0].y),
 				i32(triangle.points[1].x),
-				i32(triangle.points[1].y),
 				i32(triangle.points[2].x),
+				i32(triangle.points[0].y),
+				i32(triangle.points[1].y),
 				i32(triangle.points[2].y),
+				triangle.points[0].z,
+				triangle.points[1].z,
+				triangle.points[2].z,
+				triangle.points[0].w,
+				triangle.points[1].w,
+				triangle.points[2].w,
 				triangle.color,
 			)
 		}

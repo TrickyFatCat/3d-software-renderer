@@ -15,7 +15,6 @@ Triangle :: struct {
 	tex_coords: [3]Tex2,
 	normal:     rm.Vec3,
 	color:      u32,
-	avg_depth:  f32,
 }
 
 
@@ -23,6 +22,53 @@ draw_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 	display.draw_line(x0, y0, x1, y1, color)
 	display.draw_line(x1, y1, x2, y2, color)
 	display.draw_line(x2, y2, x0, y0, color)
+}
+
+@(private)
+draw_triangle_pixel :: proc(x, y: i32, point_a, point_b, point_c: rm.Vec4, color: display.Color) {
+	p := rm.Vec2{f32(x), f32(y)}
+	a := rm.vec2(point_a)
+	b := rm.vec2(point_b)
+	c := rm.vec2(point_c)
+
+	weights := get_barycentric_weights(a, b, c, p)
+
+	alpha := weights.x
+	beta := weights.y
+	gamma := weights.z
+
+	// Variables to store the interpolated values of U, V, and also 1/w for the current pixel
+	interpolated_u: f32
+	interpolated_v: f32
+	interpolated_reciprocal_w: f32
+
+	// Interpolate the value of 1/w for the current pixel
+	interpolated_reciprocal_w =
+		(1 / point_a.w) * alpha + (1 / point_b.w) * beta + (1 / point_c.w) * gamma
+
+	// Now we can divide back both interpolated values by 1/w
+	interpolated_u /= interpolated_reciprocal_w
+	interpolated_v /= interpolated_reciprocal_w
+
+	// Map the UV coordinate to the full texture width and heigth
+	tex_x: u32 = u32(math.abs(i32(interpolated_u * f32(texture_width)))) % texture_width
+	tex_y: u32 = u32(math.abs(i32(interpolated_v * f32(texture_height)))) % texture_height
+
+	// Adjust 1/w so the pixels that are closer to the camera have smaller value
+	interpolated_reciprocal_w = 1.0 - interpolated_reciprocal_w
+
+	// Only draw the pixel if the depth value is less than the one previously stored in the z-buffer
+	window_width, window_height := display.get_window_dimentions()
+	z_index := u32((i32(window_width) * y) + x)
+	prev_depth := display.get_z_buffer_value(z_index)
+
+	if interpolated_reciprocal_w < prev_depth {
+		// Draw a pixel at position (x, y) with the color that comes from the mapped texture
+		display.draw_pixel(int(x), int(y), color)
+
+		// Update the z-buffer value with the 1/w of this current pixel
+		display.set_z_buffer_value(z_index, interpolated_reciprocal_w)
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -48,104 +94,118 @@ draw_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
 //                         (x2,y2)
 //
 ///////////////////////////////////////////////////////////////////////////////
-draw_filled_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
+draw_filled_triangle :: proc(
+	x0, x1, x2, y0, y1, y2: i32,
+	z0, z1, z2, w0, w1, w2: f32,
+	color: display.Color,
+) {
+	// Shadow x
 	x0 := x0
 	x1 := x1
 	x2 := x2
+
+	// Shadow y
 	y0 := y0
 	y1 := y1
 	y2 := y2
+
+	// Shadow z
+	z0 := z0
+	z1 := z1
+	z2 := z2
+
+	// Shadow w
+	w0 := w0
+	w1 := w1
+	w2 := w2
 
 	// Sort vertices by y-coordinate ascending (y0 < y1 < y2)
 	if y0 > y1 {
 		swap(&x0, &x1)
 		swap(&y0, &y1)
+		swap(&z0, &z1)
+		swap(&w0, &w1)
 	}
 
 	if y1 > y2 {
 		swap(&x1, &x2)
 		swap(&y1, &y2)
+		swap(&z1, &z2)
+		swap(&w1, &w2)
 	}
 
 	if y0 > y1 {
 		swap(&x0, &x1)
 		swap(&y0, &y1)
+		swap(&z0, &z1)
+		swap(&w0, &w1)
 	}
 
-	if y1 == y2 {
-		fill_flat_bottom_triangle(x0, y0, x1, y1, x2, y2, color)
-	} else if y0 == y1 {
-		fill_flat_top_triangle(x0, y0, x1, y1, x2, y2, color)
-	} else {
-		// Calculate the new vertex (Mx, My) using triangle similarity
-		Mx: i32 = (((x2 - x0) * (y1 - y0)) / (y2 - y0)) + x0
-		My := y1
+	// Crate three vector points after we sort the vertices
+	point_a := rm.Vec4{f32(x0), f32(y0), z0, w0}
+	point_b := rm.Vec4{f32(x1), f32(y1), z1, w1}
+	point_c := rm.Vec4{f32(x2), f32(y2), z2, w2}
 
-		fill_flat_bottom_triangle(x0, y0, x1, y1, Mx, My, color)
+	////////////////////////////////////////////////////////
+	// Render the upper part of the triangle (flat-bottom)//
+	////////////////////////////////////////////////////////
+	inv_slope_1: f32 = 0.0
+	inv_slope_2: f32 = 0.0
 
-		fill_flat_top_triangle(x1, y1, Mx, My, x2, y2, color)
+	if y1 - y0 != 0 {
+		inv_slope_1 = f32(x1 - x0) / math.abs(f32(y1 - y0))
 	}
-}
 
-///////////////////////////////////////////////////////////////////////////////
-// Draw a filled a triangle with a flat bottom
-///////////////////////////////////////////////////////////////////////////////
-//
-//        (x0,y0)
-//          / \
-//         /   \
-//        /     \
-//       /       \
-//      /         \
-//  (x1,y1)------(x2,y2)
-//
-///////////////////////////////////////////////////////////////////////////////
-@(private)
-fill_flat_bottom_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
-	// Find two slopes
-	inv_slope1: f32 = (f32)(x1 - x0) / (f32)(y1 - y0)
-	inv_slope2: f32 = (f32)(x2 - x0) / (f32)(y2 - y0)
-
-	// Start x_start and x_end from the top of the vertex (x0, y0)
-	x_start: f32 = f32(x0)
-	x_end: f32 = f32(x0)
-
-	// Loop all the scanlines from top to bottom
-	for y := y0; y <= y2; y += 1 {
-		display.draw_line(i32(x_start), y, i32(x_end), y, color)
-		x_start += inv_slope1
-		x_end += inv_slope2
+	if y2 - y0 != 0 {
+		inv_slope_2 = f32(x2 - x0) / math.abs(f32(y2 - y0))
 	}
-}
 
-///////////////////////////////////////////////////////////////////////////////
-// Draw a filled a triangle with a flat top
-///////////////////////////////////////////////////////////////////////////////
-//
-//  (x0,y0)------(x1,y1)
-//      \         /
-//       \       /
-//        \     /
-//         \   /
-//          \ /
-//        (x2,y2)
-//
-///////////////////////////////////////////////////////////////////////////////
-@(private)
-fill_flat_top_triangle :: proc(x0, y0, x1, y1, x2, y2: i32, color: display.Color) {
-	// Find two slopes
-	inv_slope1: f32 = (f32)(x2 - x0) / (f32)(y2 - y0)
-	inv_slope2: f32 = (f32)(x2 - x1) / (f32)(y2 - y1)
+	if y1 - y0 != 0 {
+		// Loop all the scanlines from top to bottom
+		for y := y0; y <= y1; y += 1 {
+			x_start: i32 = x1 + i32((f32(y - y1)) * inv_slope_1)
+			x_end: i32 = x0 + i32((f32(y - y0)) * inv_slope_2)
 
-	// Start x_start and x_end from the top of the vertex (x0, y0)
-	x_start: f32 = f32(x2)
-	x_end: f32 = f32(x2)
+			// Swaw if x_start is to the right of x_end
+			if x_end < x_start {
+				swap(&x_start, &x_end)
+			}
 
-	// Loop all the scanlines from bottom to top
-	for y := y2; y >= y0; y -= 1 {
-		display.draw_line(i32(x_start), y, i32(x_end), y, color)
-		x_start -= inv_slope1
-		x_end -= inv_slope2
+			for x := x_start; x < x_end; x += 1 {
+				draw_triangle_pixel(x, y, point_a, point_b, point_c, color)
+			}
+		}
+	}
+
+	//////////////////////////////////////////////////////
+	// Render the bottom part of the triangle (flat-top)//
+	//////////////////////////////////////////////////////
+	inv_slope_1 = 0.0
+	inv_slope_2 = 0.0
+
+	if y2 - y1 != 0 {
+		inv_slope_1 = f32(x2 - x1) / math.abs(f32(y2 - y1))
+	}
+
+	if y2 - y0 != 0 {
+		inv_slope_2 = f32(x2 - x0) / math.abs(f32(y2 - y0))
+	}
+
+	if y2 - y1 != 0 {
+		// Loop all the scanlines from top to bottom
+		for y := y1; y <= y2; y += 1 {
+			x_start: i32 = x1 + i32((f32(y - y1)) * inv_slope_1)
+			x_end: i32 = x0 + i32((f32(y - y0)) * inv_slope_2)
+
+			// Swaw if x_start is to the right of x_end
+			if x_end < x_start {
+				swap(&x_start, &x_end)
+			}
+
+			for x := x_start; x < x_end; x += 1 {
+				draw_triangle_pixel(x, y, point_a, point_b, point_c, color)
+			}
+		}
 	}
 }
 
