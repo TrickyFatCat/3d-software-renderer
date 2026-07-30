@@ -57,12 +57,16 @@ setup :: proc() -> (success: bool) {
 
 		// Create global light
 		global_light = shd.create_global_light(0.0, 0.0, 0.0)
+
+		// Initialize the array of triangles to render
+		triangles_to_render = make([dynamic]mesh.Triangle)
 	}
 
 	return success
 }
 
 cleanup :: proc() {
+	delete(triangles_to_render)
 	mesh.destroy(mesh.mesh_to_render)
 	delete(mesh.texture)
 	free(global_light)
@@ -128,8 +132,6 @@ update :: proc() {
 		sdl.Delay(time_to_wait)
 	}
 
-	// Initialize the array of triangles to render
-	triangles_to_render = make([dynamic]mesh.Triangle)
 
 	// mesh.mesh_to_render.scale += 0.001
 	// mesh.mesh_to_render.translation += 0.001
@@ -349,7 +351,7 @@ render :: proc() {
 		}
 	}
 
-	delete(triangles_to_render)
+	clear(&triangles_to_render)
 	display.finish_render()
 }
 
@@ -389,4 +391,3 @@ main :: proc() {
 		render()
 	}
 }
-
